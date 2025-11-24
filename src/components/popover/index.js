@@ -1,7 +1,3 @@
-import Popover from './src/popover.vue'
-
-Popover.install = function (Vue) {
-  Vue.component(Popover.name, Popover)
-}
+import Popover from './src/Popover'
 
 export default Popover

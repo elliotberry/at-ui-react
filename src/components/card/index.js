@@ -1,7 +1,3 @@
-import Card from './src/card.vue'
-
-Card.install = function (Vue) {
-  Vue.component(Card.name, Card)
-}
+import Card from './src/Card'
 
 export default Card

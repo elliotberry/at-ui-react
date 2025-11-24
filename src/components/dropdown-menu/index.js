@@ -1,7 +1,3 @@
-import DropdownMenu from '../dropdown/src/dropdown-menu.vue'
-
-DropdownMenu.install = function (Vue) {
-  Vue.component(DropdownMenu.name, DropdownMenu)
-}
+import DropdownMenu from './src/DropdownMenu'
 
 export default DropdownMenu

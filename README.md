@@ -8,7 +8,9 @@
 
 [![NPM][npm-version-image]][npm-version-url] [![david-dm][david-dm-image]][david-dm-url] [![travis][travis-image]][travis-url]
 
-AT-UI is a modular front-end UI framework for developing fast and powerful web interfaces based on Vue.js.
+> **Note**: This library has been converted to React! See [README.REACT.md](README.REACT.md) for React usage. The original Vue.js version is still available in the git history.
+
+AT-UI is a modular front-end UI framework for developing fast and powerful web interfaces. Now available for React!
 
 [中文 README](README.zh-CN.md)
 

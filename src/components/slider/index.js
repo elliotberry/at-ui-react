@@ -1,7 +1,3 @@
-import Slider from './src/slider.vue'
-
-Slider.install = function (Vue) {
-  Vue.component(Slider.name, Slider)
-}
+import Slider from './src/Slider'
 
 export default Slider

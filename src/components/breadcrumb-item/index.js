@@ -1,7 +1,3 @@
-import BreadcrumbItem from '../breadcrumb/src/breadcrumb-item.vue'
-
-BreadcrumbItem.install = function (Vue) {
-  Vue.component(BreadcrumbItem.name, BreadcrumbItem)
-}
+import BreadcrumbItem from '../breadcrumb/src/BreadcrumbItem'
 
 export default BreadcrumbItem

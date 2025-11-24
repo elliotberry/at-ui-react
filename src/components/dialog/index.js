@@ -1,3 +1,3 @@
-import Dialog from '../modal/src/dialog.js'
+import Dialog from './src/Dialog'
 
 export default Dialog

@@ -1,7 +1,7 @@
-import Steps from './src/steps.vue'
+import Steps from './src/Steps'
+import Step from './src/Step'
 
-Steps.install = function (Vue) {
-  Vue.component(Steps.name, Steps)
-}
+Steps.Item = Step
 
 export default Steps
+export { Step }

@@ -1,7 +1,3 @@
-import Menu from './src/menu.vue'
-
-Menu.install = function (Vue) {
-  Vue.component(Menu.name, Menu)
-}
+import Menu from './src/Menu'
 
 export default Menu

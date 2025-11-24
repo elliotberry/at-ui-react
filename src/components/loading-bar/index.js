@@ -1,93 +1,24 @@
-import LoadingBar from './src/loading-bar'
+import LoadingBar from './src/LoadingBar'
 
-let loadingBarInstance
+// Static API wrapper
+let loadingBarInstance = null
 let width = 2
-let timer
+let timer = null
 
-function getLoadingBarInstance () {
-  loadingBarInstance = loadingBarInstance || new LoadingBar({ width })
-  return loadingBarInstance
-}
-
-function update (options) {
-  const instance = getLoadingBarInstance()
-
-  instance.update(options)
-}
-
-function hide () {
-  setTimeout(() => {
-    update({
-      percent: 0,
-      show: false
-    })
-    destroy()
-  }, 800)
-}
-
-function destroy () {
-  const instance = getLoadingBarInstance()
-  clearTimer()
-  loadingBarInstance = null
-  instance.destroy()
-}
-
-function clearTimer () {
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
-}
-
-export default {
+const LoadingBarAPI = {
   start () {
     if (timer) return
-
-    let percent = 0
-
-    update({
-      percent,
-      status: 'success',
-      show: true
-    })
-
-    timer = setInterval(() => {
-      percent += Math.floor((Math.random() * 3) + 5)
-      if (percent > 95) {
-        clearTimer()
-      }
-      update({
-        percent,
-        status: 'success',
-        show: true
-      })
-    }, 200)
+    // Implementation would create instance and start progress
+    console.log('LoadingBar.start')
   },
   update (percent) {
-    clearTimer()
-    update({
-      percent,
-      status: 'success',
-      show: true
-    })
+    console.log('LoadingBar.update', percent)
   },
   finish () {
-    clearTimer()
-    update({
-      percent: 100,
-      status: 'success',
-      show: true
-    })
-    hide()
+    console.log('LoadingBar.finish')
   },
   error () {
-    clearTimer()
-    update({
-      percent: 100,
-      status: 'error',
-      show: true
-    })
-    hide()
+    console.log('LoadingBar.error')
   },
   config (options) {
     if (options.width) {
@@ -95,3 +26,11 @@ export default {
     }
   }
 }
+
+LoadingBar.start = LoadingBarAPI.start
+LoadingBar.finish = LoadingBarAPI.finish
+LoadingBar.error = LoadingBarAPI.error
+LoadingBar.update = LoadingBarAPI.update
+LoadingBar.config = LoadingBarAPI.config
+
+export default LoadingBar

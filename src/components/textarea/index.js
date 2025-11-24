@@ -1,7 +1,3 @@
-import Textarea from './src/textarea.vue'
-
-Textarea.install = function (Vue) {
-  Vue.component(Textarea.name, Textarea)
-}
+import Textarea from './src/Textarea'
 
 export default Textarea

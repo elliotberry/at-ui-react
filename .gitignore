@@ -1,8 +1,9 @@
-.DS_Store
 node_modules/
-npm-debug.log
-test/unit/coverage
-test/e2e/reports
-.vscode
 dist/
-test
+.DS_Store
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

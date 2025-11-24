@@ -1,7 +1,3 @@
-import Tooltip from './src/tooltip.vue'
-
-Tooltip.install = function (Vue) {
-  Vue.component(Tooltip.name, Tooltip)
-}
+import Tooltip from './src/Tooltip'
 
 export default Tooltip

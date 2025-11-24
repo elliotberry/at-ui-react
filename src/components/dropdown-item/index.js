@@ -1,7 +1,3 @@
-import DropdownItem from '../dropdown/src/dropdown-item.vue'
-
-DropdownItem.install = function (Vue) {
-  Vue.component(DropdownItem.name, DropdownItem)
-}
+import DropdownItem from './src/DropdownItem'
 
 export default DropdownItem

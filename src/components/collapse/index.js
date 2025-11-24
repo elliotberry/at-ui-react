@@ -1,7 +1,7 @@
-import Collapse from './src/collapse.vue'
+import Collapse from './src/Collapse'
+import CollapseItem from './src/CollapseItem'
 
-Collapse.install = function (Vue) {
-  Vue.component(Collapse.name, Collapse)
-}
+Collapse.Item = CollapseItem
 
 export default Collapse
+export { CollapseItem }

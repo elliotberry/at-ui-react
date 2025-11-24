@@ -1,7 +1,3 @@
-import Tag from './src/tag.vue'
-
-Tag.install = function (Vue) {
-  Vue.component(Tag.name, Tag)
-}
+import Tag from './src/Tag'
 
 export default Tag

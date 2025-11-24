@@ -1,7 +1,3 @@
-import Rate from './src/rate.vue'
-
-Rate.install = function (Vue) {
-  Vue.component(Rate.name, Rate)
-}
+import Rate from './src/Rate'
 
 export default Rate

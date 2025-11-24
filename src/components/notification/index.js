@@ -1,3 +1,3 @@
-import Notification from './src/notic.js'
+import Notification from './src/Notification'
 
 export default Notification
