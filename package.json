@@ -17,13 +17,6 @@
     "build:component": "vite build --config vite.config.js",
     "prepublish": "npm run build:component"
   },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:at-ui/at-ui.git"
-  },
-  "bugs": {
-    "url": "https://github.com/at-ui/at-ui/issues"
-  },
   "keywords": [
     "at",
     "at-ui",
@@ -33,11 +26,8 @@
     "component",
     "react"
   ],
-  "files": [
-    "dist",
-    "src"
-  ],
-  "author": "Koppt Ho <kopptsoft@gmail.com>",
+
+
   "license": "MIT",
   "peerDependencies": {
     "react": ">=16.8.0",

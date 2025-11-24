@@ -13,15 +13,12 @@ export default defineConfig({
     preserveSymlinks: false
   },
   server: {
-    port: 3000,
+    port: 3366,
     open: true,
     fs: {
       // Allow serving files from one level up to the project root
       allow: ['..']
     }
-  },
-  optimizeDeps: {
-    include: ['classnames', 'deepmerge']
   }
 })
 

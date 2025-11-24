@@ -27,14 +27,7 @@ const Badge = (props) => {
   const content = getContent()
   const hasChildren = !!children
 
-  const badgeClasses = classNames(
-    'at-badge',
-    {
-      [`at-badge--${status}`]: status,
-      'at-badge--alone': !hasChildren
-    },
-    className
-  )
+
 
   const contentClasses = classNames(
     'at-badge__content',
@@ -45,7 +38,7 @@ const Badge = (props) => {
   )
 
   return (
-    <span className={badgeClasses} {...restProps}>
+    <span className={`at-badge at-badge--${status} ${hasChildren ? 'at-badge--corner' : 'at-badge--alone'} ${className}`} {...restProps}>
       {children}
       {show && (
         <sup className={contentClasses}>
@@ -56,7 +49,7 @@ const Badge = (props) => {
   )
 }
 
-Badge.displayName = 'AtBadge'
+Badge.displayName = 'ATBadge'
 
 export default Badge
 
