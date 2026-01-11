@@ -18,7 +18,7 @@
 
   /* modifier */
   &--checked {
-:global(.at-checkbox__inner ) {
+    .at-checkbox__inner {
       border-color: $checkbox-border-c-checked;
       background-color: $checkbox-border-c-checked;
 
@@ -28,7 +28,7 @@
     }
   }
   &--disabled {
-:global(.at-checkbox__inner ) {
+    .at-checkbox__inner {
       border-color: $checkbox-border-c-disabled;
       background-color: $checkbox-bg-c-disabled;
       cursor: $cursor-disabled;
@@ -41,7 +41,7 @@
         cursor: $cursor-disabled;
       }
     }
-:global(.at-checkbox__label ) {
+    .at-checkbox__label {
       color: $checkbox-label-c-disabled;
       cursor: $cursor-disabled;
     }

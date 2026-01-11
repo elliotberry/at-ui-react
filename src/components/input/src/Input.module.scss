@@ -117,13 +117,13 @@
     }
   }
   &--append {
-:global(.at-input__original ) {
+    .at-input__original {
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
   }
   &--icon {
-:global(.at-input__original ) {
+    .at-input__original {
       padding-right: 32px;
     }
   }

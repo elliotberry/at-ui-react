@@ -223,7 +223,7 @@ $btn-active-shade-percent: 10%;
   font-size: 0;
   display: inline-block;
 
-:global(.at-btn ) {
+  .at-btn {
     border-radius: 0;
 
     &:not(:last-child) {

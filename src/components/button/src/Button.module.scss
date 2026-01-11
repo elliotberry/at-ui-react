@@ -152,7 +152,7 @@ $btn-active-shade-percent: 10%;
         font-size: $btn-font-size-lg;
       }
     }
-:global(.at-btn__text ) {
+    .at-btn__text {
       font-size: $btn-font-size-md;
     }
   }
@@ -168,7 +168,7 @@ $btn-active-shade-percent: 10%;
         font-size: $btn-font-size-sm;
       }
     }
-:global(.at-btn__text ) {
+    .at-btn__text {
       font-size: $btn-font-size-sm;
     }
   }
@@ -184,7 +184,7 @@ $btn-active-shade-percent: 10%;
         font-size: $btn-font-size-smer;
       }
     }
-:global(.at-btn__text ) {
+    .at-btn__text {
       font-size: $btn-font-size-smer;
     }
   }
@@ -194,7 +194,7 @@ $btn-active-shade-percent: 10%;
     padding: 0;
     border-radius: 50%;
 
-:global(.at-btn__icon ) {
+    .at-btn__icon {
       font-size: 14px;
     }
   }

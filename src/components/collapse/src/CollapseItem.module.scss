@@ -65,10 +65,10 @@
   &--simple {
     border: none;
 
-:global(.at-collapse__item ) {
+    .at-collapse__item {
       border-bottom: none;
     }
-:global(.at-collapse__header ) {
+    .at-collapse__header {
       border-bottom: 1px solid $collapse-border-color;
       background-color: transparent;
     }

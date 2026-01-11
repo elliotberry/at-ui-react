@@ -19,7 +19,7 @@
 
 /* modifier */
 :global(.at-checkbox--checked) {
-  :global(.at-checkbox__inner) {
+  .at-checkbox__inner {
     border-color: $checkbox-border-c-checked;
     background-color: $checkbox-border-c-checked;
 
@@ -30,7 +30,7 @@
 }
 
 :global(.at-checkbox--disabled) {
-  :global(.at-checkbox__inner) {
+  .at-checkbox__inner {
     border-color: $checkbox-border-c-disabled;
     background-color: $checkbox-bg-c-disabled;
     cursor: $cursor-disabled;
@@ -43,7 +43,7 @@
       cursor: $cursor-disabled;
     }
   }
-  :global(.at-checkbox__label) {
+  .at-checkbox__label {
     color: $checkbox-label-c-disabled;
     cursor: $cursor-disabled;
   }

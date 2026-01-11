@@ -53,18 +53,18 @@
 
   /* modifier */
   &--success {
-:global(.at-progress-bar__inner ) {
+    .at-progress-bar__inner {
       background-color: $progress-bar-bg-color-success;
     }
-:global(.at-progress__text ) {
+    .at-progress__text {
       color: $progress-bar-bg-color-success;
     }
   }
   &--error {
-:global(.at-progress-bar__inner ) {
+    .at-progress-bar__inner {
       background-color: $progress-bar-bg-color-error;
     }
-:global(.at-progress__text ) {
+    .at-progress__text {
       color: $progress-bar-bg-color-error;
     }
   }

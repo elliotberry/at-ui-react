@@ -20,7 +20,7 @@
 :global(.at-input-number:hover:not(.at-input-number--disabled)) {
   border-color: $inputnumber-border-color-hover;
 
-  :global(.at-input-number__handler) {
+  .at-input-number__handler {
     opacity: 1;
   }
 }
@@ -115,12 +115,12 @@
   cursor: $cursor-disabled;
 }
 
-:global(.at-input-number--disabled) :global(.at-input-number__original) {
+:global(.at-input-number--disabled .at-input-number__original) {
   color: $input-font-color-disabled;
   cursor: $cursor-disabled;
 }
 
-:global(.at-input-number--disabled) :global(.at-input-number__handler) {
+:global(.at-input-number--disabled .at-input-number__handler) {
   display: none;
 }
 
@@ -128,8 +128,8 @@
   height: $inputnumber-height-sm;
 }
 
-:global(.at-input-number--small) :global(.at-input-number__up),
-:global(.at-input-number--small) :global(.at-input-number__down) {
+:global(.at-input-number--small .at-input-number__up),
+:global(.at-input-number--small .at-input-number__down) {
   height: $inputnumber-handler-ele-height-sm;
   font-size: $inputnumber-handler-font-size-sm;
 
@@ -142,8 +142,8 @@
   height: $inputnumber-height-lg;
 }
 
-:global(.at-input-number--large) :global(.at-input-number__up),
-:global(.at-input-number--large) :global(.at-input-number__down) {
+:global(.at-input-number--large .at-input-number__up),
+:global(.at-input-number--large .at-input-number__down) {
   height: $inputnumber-handler-ele-height-lg;
   font-size: $inputnumber-handler-font-size-lg;
 

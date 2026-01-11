@@ -10,7 +10,9 @@ export default defineConfig({
       'at-ui': resolve(__dirname, '../src')
     },
     // Preserve symlinks to help resolve relative imports correctly
-    preserveSymlinks: false
+    preserveSymlinks: false,
+    // Ensure directory imports resolve correctly
+    extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json', '.scss', '.css']
   },
   server: {
     port: 3366,

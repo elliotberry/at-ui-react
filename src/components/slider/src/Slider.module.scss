@@ -48,7 +48,7 @@
       cursor: grabbing;
     }
     /* tooltip */
-:global(.at-tooltip ) {
+    .at-tooltip {
       display: block;
       height: 100%;
       line-height: 1;
@@ -61,7 +61,7 @@
         vertical-align: middle;
       }
     }
-:global(.at-tooltip__trigger ) {
+    .at-tooltip__trigger {
       vertical-align: middle;
     }
   }
@@ -91,10 +91,10 @@
 
   /* modifier */
   &--disabled {
-:global(.at-slider__bar ) {
+    .at-slider__bar {
       background-color: $slider-bar-bg-color-disabled;
     }
-:global(.at-slider__dot ) {
+    .at-slider__dot {
       background-color: $slider-dot-color-disabled;
     }
   }

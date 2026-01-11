@@ -50,12 +50,12 @@
     border-color: $alert-border-color-success;
     background-color: $alert-bg-color-success;
 
-:global(.at-alert__message,
-:global(.at-alert__description,
-:global(.at-alert__icon ) {
+    .at-alert__message,
+    .at-alert__description,
+    .at-alert__icon {
       color: $alert-text-color-success;
     }
-:global(.at-alert__close ) {
+    .at-alert__close {
       color: $alert-icon-color-success;
     }
   }
@@ -63,12 +63,12 @@
     border-color: $alert-border-color-error;
     background-color: $alert-bg-color-error;
 
-:global(.at-alert__message,
-:global(.at-alert__description,
-:global(.at-alert__icon ) {
+    .at-alert__message,
+    .at-alert__description,
+    .at-alert__icon {
       color: $alert-text-color-error;
     }
-:global(.at-alert__close ) {
+    .at-alert__close {
       color: $alert-icon-color-error;
     }
   }
@@ -76,12 +76,12 @@
     border-color: $alert-border-color-warning;
     background-color: $alert-bg-color-warning;
 
-:global(.at-alert__message,
-:global(.at-alert__description,
-:global(.at-alert__icon ) {
+    .at-alert__message,
+    .at-alert__description,
+    .at-alert__icon {
       color: $alert-text-color-warning;
     }
-:global(.at-alert__close ) {
+    .at-alert__close {
       color: $alert-icon-color-warning;
     }
   }
@@ -89,22 +89,22 @@
     border-color: $alert-border-color-info;
     background-color: $alert-bg-color-info;
 
-:global(.at-alert__message,
-:global(.at-alert__description,
-:global(.at-alert__icon ) {
+    .at-alert__message,
+    .at-alert__description,
+    .at-alert__icon {
       color: $alert-text-color-info;
     }
-:global(.at-alert__close ) {
+    .at-alert__close {
       color: $alert-icon-color-info;
     }
   }
   &--with-description {
     padding: $alert-padding-lg;
 
-:global(.at-alert__icon ) {
+    .at-alert__icon {
       font-size: 24px;
     }
-:global(.at-alert__message ) {
+    .at-alert__message {
       font-weight: bold;
     }
   }

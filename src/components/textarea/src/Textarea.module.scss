@@ -36,7 +36,7 @@
 }
 
 :global(.at-textarea--disabled) {
-  :global(.at-textarea__original) {
+  .at-textarea__original {
     color: $input-font-color-disabled;
     border-color: $input-border-color-disabled;
     background-color: $input-bg-color-disabled;
