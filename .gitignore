@@ -1,6 +1,7 @@
 .coderobot
 #wrangler (cf workers)
 .wrangler
+dist
 # Compiled source
 *.com
 *.class
