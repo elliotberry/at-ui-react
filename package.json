@@ -30,21 +30,21 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "classnames": "^2.3.2"
+    "classnames": "^2.5.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
-    "@vitejs/plugin-react": "^4.2.0",
-    "autoprefixer": "^10.4.16",
-    "eslint": "^8.57.1",
+    "@vitejs/plugin-react": "^5.1.2",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9.39.2",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^17.0.0",
-    "postcss": "^8.4.31",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "sass": "^1.69.5",
-    "vite": "^5.0.0"
+    "postcss": "^8.5.6",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "sass": "^1.97.2",
+    "vite": "^7.3.1"
   }
 }
