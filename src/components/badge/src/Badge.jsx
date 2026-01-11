@@ -1,6 +1,5 @@
 import React from 'react'
 import classNames from 'classnames'
-import styles from './Badge.module.scss'
 
 const Badge = (props) => {
   const {
@@ -26,8 +25,6 @@ const Badge = (props) => {
 
   const content = getContent()
   const hasChildren = !!children
-
-
 
   const contentClasses = classNames(
     'at-badge__content',

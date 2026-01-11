@@ -1,6 +1,5 @@
 import React, { createContext } from 'react'
 import classNames from 'classnames'
-import styles from './Timeline.module.scss'
 
 export const TimelineContext = createContext(null)
 

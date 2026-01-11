@@ -1,6 +1,5 @@
 import React, { createContext } from 'react'
 import classNames from 'classnames'
-import styles from './ButtonGroup.module.scss'
 
 export const ButtonGroupContext = createContext({})
 

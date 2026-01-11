@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import classNames from 'classnames'
 import { TimelineContext } from './Timeline'
-import styles from './TimelineItem.module.scss'
 
 const TimelineItem = (props) => {
   const {

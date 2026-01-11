@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import classNames from 'classnames'
 import Button from '../../button/src/Button'
 import Input from '../../input/src/Input'
-import styles from './Modal.module.scss'
 
 const Modal = (props) => {
   const {

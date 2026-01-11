@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import classNames from 'classnames'
-import styles from './Switch.module.scss'
 
 const Switch = (props) => {
   const {

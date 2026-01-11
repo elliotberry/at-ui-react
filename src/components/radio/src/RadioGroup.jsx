@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import classNames from 'classnames'
 import { RadioGroupContext } from './Radio'
-import styles from './RadioGroup.module.scss'
 
 const RadioGroup = (props) => {
   const {

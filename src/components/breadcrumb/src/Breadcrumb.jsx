@@ -1,6 +1,5 @@
 import React, { createContext } from 'react'
 import classNames from 'classnames'
-import styles from './Breadcrumb.module.scss'
 
 export const BreadcrumbContext = createContext({})
 

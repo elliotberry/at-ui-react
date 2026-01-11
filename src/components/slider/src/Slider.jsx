@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react'
 import classNames from 'classnames'
 import InputNumber from '../../input-number/src/InputNumber'
 import Tooltip from '../../tooltip/src/Tooltip'
-import styles from './Slider.module.scss'
 
 const Slider = (props) => {
   const {

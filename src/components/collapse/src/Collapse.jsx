@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext } from 'react'
 import classNames from 'classnames'
-import styles from './Collapse.module.scss'
 
 export const CollapseContext = createContext(null)
 

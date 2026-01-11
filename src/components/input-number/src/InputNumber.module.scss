@@ -3,18 +3,22 @@
  */
 @import '../../../stylesheet/variables/index.scss';
 
-:global(.at-input-number) {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  height: $inputnumber-height-base;
-  min-width: $inputnumber-min-width;
-  border: 1px solid $inputnumber-border-color;
-  border-radius: $inputnumber-border-radius;
-  background-color: $color-white;
-  transition: border .2s;
-  overflow: hidden;
+:global {
+  .at-input-number {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    height: $inputnumber-height-base;
+    min-width: $inputnumber-min-width;
+    border: 1px solid $inputnumber-border-color;
+    border-radius: $inputnumber-border-radius;
+    background-color: $color-white;
+    transition: border .2s;
+    overflow: hidden;
+
+  }
 }
+
 
 /* status */
 :global(.at-input-number:hover:not(.at-input-number--disabled)) {
@@ -26,22 +30,28 @@
 }
 
 /* element */
-:global(.at-input-number__input) {
-  width: 100%;
-  height: 100%;
+:global {
+  .at-input-number__input {
+    width: 100%;
+    height: 100%;
+
+  }
 }
 
-:global(.at-input-number__original) {
-  display: block;
-  width: 100%;
-  height: 100%;
-  padding: $inputnumber-padding-base;
-  color: $inputnumber-font-color;
-  line-height: 1.5;
-  border: none;
-  border-radius: $inputnumber-border-radius;
-  background-color: $inputnumber-bg-color;
-  outline: none;
+:global {
+  .at-input-number__original {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: $inputnumber-padding-base;
+    color: $inputnumber-font-color;
+    line-height: 1.5;
+    border: none;
+    border-radius: $inputnumber-border-radius;
+    background-color: $inputnumber-bg-color;
+    outline: none;
+
+  }
 }
 
 :global(.at-input-number) input[type=number] {
@@ -55,31 +65,37 @@
   }
 }
 
-:global(.at-input-number__handler) {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: $inputnumber-handler-width;
-  height: 100%;
-  border-left: 1px solid $inputnumber-handler-border-color;
-  border-radius: 0 $inputnumber-border-radius $inputnumber-border-radius 0;
-  transition: opacity .3s;;
-  opacity: 0;
+:global {
+  .at-input-number__handler {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: $inputnumber-handler-width;
+    height: 100%;
+    border-left: 1px solid $inputnumber-handler-border-color;
+    border-radius: 0 $inputnumber-border-radius $inputnumber-border-radius 0;
+    transition: opacity .3s;;
+    opacity: 0;
+
+  }
 }
 
 :global(.at-input-number__up),
-:global(.at-input-number__down) {
-  position: relative;
-  display: flex;
-  width: 100%;
-  height: $inputnumber-handler-ele-height-base;
-  align-items: center;
-  justify-content: center;
-  color: $inputnumber-handler-font-color;
-  font-size: $inputnumber-handler-font-size-base;
-  text-align: center;
-  transition: all .3s;
-  cursor: pointer;
+:global {
+  .at-input-number__down {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: $inputnumber-handler-ele-height-base;
+    align-items: center;
+    justify-content: center;
+    color: $inputnumber-handler-font-color;
+    font-size: $inputnumber-handler-font-size-base;
+    text-align: center;
+    transition: all .3s;
+    cursor: pointer;
+
+  }
 }
 
 :global(.at-input-number__up:hover:not(.at-input-number__up--disabled)),
@@ -94,60 +110,87 @@
 }
 
 :global(.at-input-number__up--disabled),
-:global(.at-input-number__down--disabled) {
-  color: $inputnumber-handler-ele-font-color-disabled;
-  cursor: $cursor-disabled;
+:global {
+  .at-input-number__down--disabled {
+    color: $inputnumber-handler-ele-font-color-disabled;
+    cursor: $cursor-disabled;
+
+  }
 }
 
-:global(.at-input-number__down) {
-  border-top: 1px solid $inputnumber-handler-border-color;
+:global {
+  .at-input-number__down {
+    border-top: 1px solid $inputnumber-handler-border-color;
 
-  &:hover {
-    margin-top: -2px;
+    &:hover {
+      margin-top: -2px;
+    }
+
   }
 }
 
 /* modifier */
-:global(.at-input-number--disabled) {
-  color: $input-font-color-disabled;
-  border-color: $inputnumber-border-color-disabled;
-  background-color: $inputnumber-bg-color-disabled;
-  cursor: $cursor-disabled;
-}
+:global {
+  .at-input-number--disabled {
+    color: $input-font-color-disabled;
+    border-color: $inputnumber-border-color-disabled;
+    background-color: $inputnumber-bg-color-disabled;
+    cursor: $cursor-disabled;
 
-:global(.at-input-number--disabled .at-input-number__original) {
-  color: $input-font-color-disabled;
-  cursor: $cursor-disabled;
-}
-
-:global(.at-input-number--disabled .at-input-number__handler) {
-  display: none;
-}
-
-:global(.at-input-number--small) {
-  height: $inputnumber-height-sm;
-}
-
-:global(.at-input-number--small .at-input-number__up),
-:global(.at-input-number--small .at-input-number__down) {
-  height: $inputnumber-handler-ele-height-sm;
-  font-size: $inputnumber-handler-font-size-sm;
-
-  &:hover {
-    height: $inputnumber-handler-ele-height-sm-hover !important;
   }
 }
 
-:global(.at-input-number--large) {
-  height: $inputnumber-height-lg;
+:global {
+  .at-input-number--disabled .at-input-number__original {
+    color: $input-font-color-disabled;
+    cursor: $cursor-disabled;
+
+  }
+}
+
+:global {
+  .at-input-number--disabled .at-input-number__handler {
+    display: none;
+
+  }
+}
+
+:global {
+  .at-input-number--small {
+    height: $inputnumber-height-sm;
+
+  }
+}
+
+:global(.at-input-number--small .at-input-number__up),
+:global {
+  .at-input-number--small .at-input-number__down {
+    height: $inputnumber-handler-ele-height-sm;
+    font-size: $inputnumber-handler-font-size-sm;
+
+    &:hover {
+      height: $inputnumber-handler-ele-height-sm-hover !important;
+    }
+
+  }
+}
+
+:global {
+  .at-input-number--large {
+    height: $inputnumber-height-lg;
+
+  }
 }
 
 :global(.at-input-number--large .at-input-number__up),
-:global(.at-input-number--large .at-input-number__down) {
-  height: $inputnumber-handler-ele-height-lg;
-  font-size: $inputnumber-handler-font-size-lg;
+:global {
+  .at-input-number--large .at-input-number__down {
+    height: $inputnumber-handler-ele-height-lg;
+    font-size: $inputnumber-handler-font-size-lg;
 
-  &:hover {
-    height: $inputnumber-handler-ele-height-lg-hover !important;
+    &:hover {
+      height: $inputnumber-handler-ele-height-lg-hover !important;
+    }
+
   }
 }

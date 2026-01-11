@@ -1,7 +1,6 @@
 import React, { useState, useEffect, createContext, useRef } from 'react'
 import classNames from 'classnames'
 import TabPane from './TabPane'
-import styles from './Tabs.module.scss'
 
 export const TabsContext = createContext(null)
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import classNames from 'classnames'
-import styles from './Pagination.module.scss'
 
 const Pagination = (props) => {
   const {

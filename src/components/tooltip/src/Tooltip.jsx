@@ -1,7 +1,6 @@
 import React from 'react'
 import { usePopover } from '../../../hooks/usePopover'
 import classNames from 'classnames'
-import styles from './Tooltip.module.scss'
 
 const Tooltip = React.forwardRef((props, ref) => {
   const {

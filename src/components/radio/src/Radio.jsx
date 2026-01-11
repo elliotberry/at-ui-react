@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from 'react'
 import classNames from 'classnames'
-import styles from './Radio.module.scss'
 
 export const RadioGroupContext = createContext(null)
 

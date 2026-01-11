@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import classNames from 'classnames'
-import styles from './Alert.module.scss'
 
 const Alert = (props) => {
   const {

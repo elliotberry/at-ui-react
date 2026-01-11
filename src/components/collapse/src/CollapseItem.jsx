@@ -1,7 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react'
 import classNames from 'classnames'
 import { CollapseContext } from './Collapse'
-import styles from './CollapseItem.module.scss'
 
 const CollapseItem = (props) => {
   const {

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import classNames from 'classnames'
 import { useFormItem } from '../../../hooks/useFormItem'
-import styles from './Textarea.module.scss'
 
 const Textarea = React.forwardRef((props, ref) => {
   const {

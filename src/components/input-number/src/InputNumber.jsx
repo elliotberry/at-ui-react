@@ -1,6 +1,5 @@
 import React from 'react'
 import Input from '../../input/src/Input'
-import styles from './InputNumber.module.scss'
 
 // InputNumber is a specialized Input component
 // This is a basic implementation - can be enhanced later

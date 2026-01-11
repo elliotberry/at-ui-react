@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import classNames from 'classnames'
 import { StepsContext } from './Steps'
-import styles from './Step.module.scss'
 
 const Step = (props) => {
   const {

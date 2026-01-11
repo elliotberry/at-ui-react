@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import classNames from 'classnames'
 import { ButtonGroupContext } from './ButtonGroup'
-import styles from './Button.module.scss'
 
 const Button = React.forwardRef((props, ref) => {
   const {

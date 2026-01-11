@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import { usePopover } from '../../../hooks/usePopover'
 import { useClickOutside } from '../../../hooks/useClickOutside'
 import classNames from 'classnames'
-import styles from './Popover.module.scss'
 
 const Popover = React.forwardRef((props, ref) => {
   const {

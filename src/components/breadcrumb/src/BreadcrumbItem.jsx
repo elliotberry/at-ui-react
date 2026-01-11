@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import classNames from 'classnames'
 import { BreadcrumbContext } from './Breadcrumb'
-import styles from './BreadcrumbItem.module.scss'
 
 const BreadcrumbItem = (props) => {
   const {

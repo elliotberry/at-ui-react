@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from 'react'
 import classNames from 'classnames'
-import styles from './Checkbox.module.scss'
 
 export const CheckboxGroupContext = createContext(null)
 

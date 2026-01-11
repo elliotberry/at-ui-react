@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import classNames from 'classnames'
 import { CheckboxGroupContext } from './Checkbox'
-import styles from './CheckboxGroup.module.scss'
 
 const CheckboxGroup = (props) => {
   const {
