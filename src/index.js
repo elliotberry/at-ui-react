@@ -1,4 +1,8 @@
-// React Components
+// Styles (emitted as dist/at.css)
+import './stylesheet/index.scss'
+import './styles/extras.scss'
+
+// Components
 import Button from './components/button'
 import ButtonGroup from './components/button-group'
 import Tag from './components/tag'
@@ -30,48 +34,6 @@ import Tabs from './components/tabs'
 import TabPane from './components/tab-pane'
 import Timeline from './components/timeline'
 import TimelineItem from './components/timeline-item'
-
-// Placeholder exports for components not yet converted
-const PlaceholderComponent = () => {
-  console.warn('This component is not yet converted to React')
-  return null
-}
-
-const components = {
-  Button,
-  ButtonGroup,
-  Tag,
-  Radio,
-  RadioGroup,
-  RadioButton,
-  Checkbox,
-  CheckboxGroup,
-  Input,
-  InputNumber,
-  Textarea,
-  Badge,
-  Switch,
-  Alert,
-  Card,
-  Slider,
-  Tooltip,
-  Popover,
-  Progress,
-  Rate,
-  Breadcrumb,
-  BreadcrumbItem,
-  Pagination,
-  Collapse,
-  CollapseItem,
-  Steps,
-  Step,
-  Tabs,
-  TabPane,
-  Timeline,
-  TimelineItem
-}
-
-// Import remaining components
 import LoadingBar from './components/loading-bar'
 import Modal from './components/modal'
 import Dialog from './components/dialog'
@@ -88,25 +50,7 @@ import MenuItem from './components/menu-item'
 import MenuItemGroup from './components/menu-item-group'
 import Submenu from './components/submenu'
 import Table from './components/table'
-
-Object.assign(components, {
-  LoadingBar,
-  Modal,
-  Dialog,
-  Select,
-  Option,
-  OptionGroup,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
-  Message,
-  Notification,
-  Menu,
-  MenuItem,
-  MenuItemGroup,
-  Submenu,
-  Table
-})
+import Form, { FormItem } from './components/form'
 
 export {
   Button,
@@ -155,7 +99,61 @@ export {
   MenuItem,
   MenuItemGroup,
   Submenu,
-  Table
+  Table,
+  Form,
+  FormItem
+}
+
+const components = {
+  Button,
+  ButtonGroup,
+  Tag,
+  Radio,
+  RadioGroup,
+  RadioButton,
+  Checkbox,
+  CheckboxGroup,
+  Input,
+  InputNumber,
+  Textarea,
+  Badge,
+  Switch,
+  Alert,
+  Card,
+  Slider,
+  Tooltip,
+  Popover,
+  Progress,
+  Rate,
+  Breadcrumb,
+  BreadcrumbItem,
+  Pagination,
+  Collapse,
+  CollapseItem,
+  Steps,
+  Step,
+  Tabs,
+  TabPane,
+  Timeline,
+  TimelineItem,
+  LoadingBar,
+  Modal,
+  Dialog,
+  Select,
+  Option,
+  OptionGroup,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  Message,
+  Notification,
+  Menu,
+  MenuItem,
+  MenuItemGroup,
+  Submenu,
+  Table,
+  Form,
+  FormItem
 }
 
 export default components

@@ -1,46 +1,40 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import classNames from 'classnames'
 import { CheckboxGroupContext } from './Checkbox'
+import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
 const CheckboxGroup = (props) => {
   const {
-    value: valueProp = [],
+    value: valueProp,
+    defaultValue,
+    disabled = false,
     onChange,
     className,
     children,
     ...restProps
   } = props
 
-  const [value, setValue] = useState(valueProp)
-
-  useEffect(() => {
-    setValue(valueProp)
-  }, [valueProp])
+  const [value, setValue] = useSyncedState(valueProp, defaultValue || [])
+  const formItem = useFormItem()
 
   const handleChange = (label, checked) => {
-    let newValue = [...value]
-    
+    const current = Array.isArray(value) ? value : []
+    let next
+
     if (checked) {
-      if (!newValue.includes(label)) {
-        newValue.push(label)
-      }
+      next = current.includes(label) ? current : [...current, label]
     } else {
-      newValue = newValue.filter(item => item !== label)
+      next = current.filter(item => item !== label)
     }
 
-    setValue(newValue)
-    if (onChange) {
-      onChange(newValue)
-    }
-  }
-
-  const contextValue = {
-    value,
-    onChange: handleChange
+    setValue(next)
+    if (onChange) onChange(next)
+    if (formItem) formItem.onChange(next)
   }
 
   return (
-    <CheckboxGroupContext.Provider value={contextValue}>
+    <CheckboxGroupContext.Provider value={{ value, disabled, onChange: handleChange }}>
       <div className={classNames('at-checkbox-group', className)} {...restProps}>
         {children}
       </div>
@@ -51,4 +45,3 @@ const CheckboxGroup = (props) => {
 CheckboxGroup.displayName = 'AtCheckboxGroup'
 
 export default CheckboxGroup
-

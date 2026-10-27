@@ -10,18 +10,17 @@ const Tag = (props) => {
     closable = false,
     onClose,
     className,
+    style,
     children,
     ...restProps
   } = props
 
   const colorClass = colorArr.indexOf(color) > -1 ? `at-tag--${color}` : ''
   
-  const colorStyle = colorArr.indexOf(color) > -1 
-    ? {} 
-    : {
-        borderColor: color,
-        backgroundColor: color
-      }
+  // Any other value is treated as a custom CSS colour
+  const colorStyle = colorArr.indexOf(color) > -1
+    ? {}
+    : { borderColor: color, backgroundColor: color }
 
   const tagClasses = classNames('at-tag', colorClass, className)
 
@@ -36,7 +35,7 @@ const Tag = (props) => {
   }
 
   return (
-    <span className={tagClasses} style={colorStyle} {...restProps}>
+    <span className={tagClasses} style={{ ...colorStyle, ...style }} {...restProps}>
       <span className="at-tag__text">{children}</span>
       {closable && (
         <i className="icon icon-x at-tag__close" onClick={closeAction} />

@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 import classNames from 'classnames'
 import { RadioGroupContext } from './Radio'
-import './radio-button.scss'
 
 const RadioButton = (props) => {
   const {
@@ -22,32 +21,24 @@ const RadioButton = (props) => {
 
   const { value, size, fill, textColor, onChange } = groupContext
   const isChecked = value === label
+  const isDisabled = disabled || groupContext.disabled
 
-  const activeStyle = isChecked ? {
-    ...(fill && {
-      backgroundColor: fill,
-      borderColor: fill
-    }),
-    ...(textColor && {
-      color: textColor
-    })
-  } : null
+  const activeStyle = isChecked
+    ? {
+        ...(fill && { backgroundColor: fill, borderColor: fill }),
+        ...(textColor && { color: textColor })
+      }
+    : undefined
 
   const radioButtonClasses = classNames(
     'at-radio-button',
     {
       [`at-radio-button--${size}`]: size,
-      'at-radio--checked': isChecked
+      'at-radio--checked': isChecked,
+      'at-radio--disabled': isDisabled
     },
     className
   )
-
-  const handleChange = (evt) => {
-    if (disabled) return
-    if (onChange) {
-      onChange(label)
-    }
-  }
 
   return (
     <label className={radioButtonClasses}>
@@ -57,12 +48,12 @@ const RadioButton = (props) => {
         name={name}
         value={label}
         checked={isChecked}
-        disabled={disabled}
-        onChange={handleChange}
+        disabled={isDisabled}
         {...restProps}
+        onChange={() => !isDisabled && onChange(label)}
       />
       <span className="at-radio-button__inner" style={activeStyle}>
-        {children || label}
+        {children !== undefined ? children : label}
       </span>
     </label>
   )
@@ -71,4 +62,3 @@ const RadioButton = (props) => {
 RadioButton.displayName = 'AtRadioButton'
 
 export default RadioButton
-

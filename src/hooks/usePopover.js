@@ -1,163 +1,129 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useSyncedState } from './useSyncedState'
 
+export const PLACEMENTS = [
+  'top', 'top-left', 'top-right',
+  'left', 'left-top', 'left-bottom',
+  'right', 'right-top', 'right-bottom',
+  'bottom', 'bottom-left', 'bottom-right'
+]
+
+/**
+ * Computes the popper position (relative to the trigger's offset parent).
+ */
+export const computePosition = (placement, trigger, popover) => {
+  const left = trigger.offsetLeft
+  const top = trigger.offsetTop
+  const tw = trigger.offsetWidth
+  const th = trigger.offsetHeight
+  const pw = popover.offsetWidth
+  const ph = popover.offsetHeight
+
+  switch (placement) {
+    case 'top-left': return { left, top: top - ph }
+    case 'top-right': return { left: left + tw - pw, top: top - ph }
+    case 'left': return { left: left - pw, top: top + th / 2 - ph / 2 }
+    case 'left-top': return { left: left - pw, top }
+    case 'left-bottom': return { left: left - pw, top: top + th - ph }
+    case 'right': return { left: left + tw, top: top + th / 2 - ph / 2 }
+    case 'right-top': return { left: left + tw, top }
+    case 'right-bottom': return { left: left + tw, top: top + th - ph }
+    case 'bottom': return { left: left - pw / 2 + tw / 2, top: top + th }
+    case 'bottom-left': return { left, top: top + th }
+    case 'bottom-right': return { left: left + tw - pw, top: top + th }
+    case 'top':
+    default:
+      return { left: left - pw / 2 + tw / 2, top: top - ph }
+  }
+}
+
+/**
+ * Shared behaviour of Tooltip, Popover and Dropdown.
+ *
+ * Attach `triggerRef` to the element the popper is anchored to, `popoverRef`
+ * to the popper, and spread `triggerProps` (and `popoverProps`) on the
+ * elements that should react to the trigger event. `trigger` may be
+ * 'hover', 'click', 'focus' or 'manual' (only the `value` prop controls it).
+ */
 export const usePopover = ({
   trigger = 'hover',
   placement = 'top',
-  value: valueProp = false,
-  onToggle
-}) => {
-  const [show, setShow] = useState(valueProp)
+  value,
+  onToggle,
+  hideDelay = 200
+} = {}) => {
+  const [show, setShow] = useSyncedState(value, false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const triggerRef = useRef(null)
   const popoverRef = useRef(null)
   const timerRef = useRef(null)
+  const onToggleRef = useRef(onToggle)
 
   useEffect(() => {
-    setShow(valueProp)
-  }, [valueProp])
+    onToggleRef.current = onToggle
+  })
 
-  const setPopoverPosition = useCallback(() => {
+  const update = useCallback(() => {
     if (!triggerRef.current || !popoverRef.current) return
-
-    const trigger = triggerRef.current
-    const popover = popoverRef.current
-
-    let newPosition = { top: 0, left: 0 }
-
-    switch (placement) {
-      case 'top':
-        newPosition.left = trigger.offsetLeft - (popover.offsetWidth / 2) + (trigger.offsetWidth / 2)
-        newPosition.top = trigger.offsetTop - popover.offsetHeight
-        break
-      case 'top-left':
-        newPosition.left = trigger.offsetLeft
-        newPosition.top = trigger.offsetTop - popover.offsetHeight
-        break
-      case 'top-right':
-        newPosition.left = trigger.offsetLeft + trigger.offsetWidth - popover.offsetWidth
-        newPosition.top = trigger.offsetTop - popover.offsetHeight
-        break
-      case 'left':
-        newPosition.left = trigger.offsetLeft - popover.offsetWidth
-        newPosition.top = trigger.offsetTop + (trigger.offsetHeight / 2) - (popover.offsetHeight / 2)
-        break
-      case 'left-top':
-        newPosition.left = trigger.offsetLeft - popover.offsetWidth
-        newPosition.top = trigger.offsetTop
-        break
-      case 'left-bottom':
-        newPosition.left = trigger.offsetLeft - popover.offsetWidth
-        newPosition.top = trigger.offsetTop + trigger.offsetHeight - popover.offsetHeight
-        break
-      case 'right':
-        newPosition.left = trigger.offsetLeft + trigger.offsetWidth
-        newPosition.top = trigger.offsetTop + (trigger.offsetHeight / 2) - (popover.offsetHeight / 2)
-        break
-      case 'right-top':
-        newPosition.left = trigger.offsetLeft + trigger.offsetWidth
-        newPosition.top = trigger.offsetTop
-        break
-      case 'right-bottom':
-        newPosition.left = trigger.offsetLeft + trigger.offsetWidth
-        newPosition.top = trigger.offsetTop + trigger.offsetHeight - popover.offsetHeight
-        break
-      case 'bottom':
-        newPosition.left = trigger.offsetLeft - (popover.offsetWidth / 2) + (trigger.offsetWidth / 2)
-        newPosition.top = trigger.offsetTop + trigger.offsetHeight
-        break
-      case 'bottom-left':
-        newPosition.left = trigger.offsetLeft
-        newPosition.top = trigger.offsetTop + trigger.offsetHeight
-        break
-      case 'bottom-right':
-        newPosition.left = trigger.offsetLeft + trigger.offsetWidth - popover.offsetWidth
-        newPosition.top = trigger.offsetTop + trigger.offsetHeight
-        break
-      default:
-        newPosition.left = trigger.offsetLeft - (popover.offsetWidth / 2) + (trigger.offsetWidth / 2)
-        newPosition.top = trigger.offsetTop - popover.offsetHeight
-    }
-
-    setPosition(newPosition)
-    if (popover) {
-      popover.style.top = `${newPosition.top}px`
-      popover.style.left = `${newPosition.left}px`
-    }
+    setPosition(computePosition(placement, triggerRef.current, popoverRef.current))
   }, [placement])
 
-  const toggle = useCallback(() => {
-    const newShow = !show
-    setShow(newShow)
-    if (onToggle) {
-      onToggle(newShow)
-    }
-    if (newShow) {
-      setTimeout(setPopoverPosition, 0)
-    }
-  }, [show, onToggle, setPopoverPosition])
+  // Measure after the popper is in the DOM but before the browser paints.
+  useLayoutEffect(() => {
+    if (show) update()
+  }, [show, update])
 
-  const showPopover = useCallback(() => {
-    setShow(true)
-    setTimeout(setPopoverPosition, 0)
-  }, [setPopoverPosition])
+  useEffect(() => () => clearTimeout(timerRef.current), [])
 
-  const hidePopover = useCallback(() => {
-    setShow(false)
-  }, [])
-
-  const handleMouseEnter = useCallback(() => {
-    showPopover()
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
-    }
-  }, [showPopover])
-
-  const handleMouseLeave = useCallback(() => {
-    timerRef.current = setTimeout(() => {
-      hidePopover()
-    }, 200)
-  }, [hidePopover])
-
+  const showRef = useRef(show)
   useEffect(() => {
-    const triggerEl = triggerRef.current
-    if (!triggerEl) return
+    showRef.current = show
+  })
 
-    if (trigger === 'click') {
-      triggerEl.addEventListener('click', toggle)
-    } else if (trigger === 'hover') {
-      triggerEl.addEventListener('mouseenter', handleMouseEnter)
-      triggerEl.addEventListener('mouseleave', handleMouseLeave)
-    } else if (trigger === 'focus') {
-      triggerEl.addEventListener('focus', showPopover)
-      triggerEl.addEventListener('blur', hidePopover)
-    }
+  const setVisible = useCallback((next) => {
+    clearTimeout(timerRef.current)
+    if (showRef.current === next) return
+    showRef.current = next
+    setShow(next)
+    if (onToggleRef.current) onToggleRef.current(next)
+  }, [setShow])
 
-    return () => {
-      if (trigger === 'click') {
-        triggerEl.removeEventListener('click', toggle)
-      } else if (trigger === 'hover') {
-        triggerEl.removeEventListener('mouseenter', handleMouseEnter)
-        triggerEl.removeEventListener('mouseleave', handleMouseLeave)
-      } else if (trigger === 'focus') {
-        triggerEl.removeEventListener('focus', showPopover)
-        triggerEl.removeEventListener('blur', hidePopover)
-      }
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
-      }
-    }
-  }, [trigger, toggle, handleMouseEnter, handleMouseLeave, showPopover, hidePopover])
+  const showPopover = useCallback(() => setVisible(true), [setVisible])
+  const hidePopover = useCallback(() => setVisible(false), [setVisible])
+  const toggle = useCallback(() => setVisible(!showRef.current), [setVisible])
+
+  const scheduleHide = useCallback(() => {
+    clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setVisible(false), hideDelay)
+  }, [setVisible, hideDelay])
+
+  const cancelHide = useCallback(() => clearTimeout(timerRef.current), [])
+
+  const triggerProps = {}
+  const popoverProps = {}
+
+  if (trigger === 'click') {
+    triggerProps.onClick = toggle
+  } else if (trigger === 'hover') {
+    triggerProps.onMouseEnter = showPopover
+    triggerProps.onMouseLeave = scheduleHide
+    popoverProps.onMouseEnter = cancelHide
+    popoverProps.onMouseLeave = scheduleHide
+  } else if (trigger === 'focus') {
+    triggerProps.onFocus = showPopover
+    triggerProps.onBlur = hidePopover
+  }
 
   return {
     show,
     position,
     triggerRef,
     popoverRef,
+    triggerProps,
+    popoverProps,
     toggle,
     showPopover,
     hidePopover,
-    handleMouseEnter,
-    handleMouseLeave
+    update
   }
 }
-

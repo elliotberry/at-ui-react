@@ -1,3 +1,3 @@
-import Option from './src/Option'
+import Option from '../select/src/Option'
 
 export default Option

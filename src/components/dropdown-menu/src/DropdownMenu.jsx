@@ -1,9 +1,12 @@
 import React from 'react'
-const DropdownMenu = () => {
-  console.warn('DropdownMenu component - to be implemented')
-  return null
-}
+import classNames from 'classnames'
+
+const DropdownMenu = ({ className, children, ...restProps }) => (
+  <ul className={classNames('at-dropdown-menu', className)} {...restProps}>
+    {children}
+  </ul>
+)
 
 DropdownMenu.displayName = 'AtDropdownMenu'
-export default DropdownMenu
 
+export default DropdownMenu

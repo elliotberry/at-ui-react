@@ -1,24 +1,43 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import classNames from 'classnames'
 import Button from '../../button/src/Button'
 import Input from '../../input/src/Input'
+import { useSyncedState } from '../../../hooks/useSyncedState'
+import { transitionClass, usePresence } from '../../../utils/transition'
 
+const ICONS = {
+  success: 'icon-check-circle',
+  error: 'icon-x-circle',
+  warning: 'icon-alert-circle',
+  info: 'icon-info'
+}
+
+/**
+ * `value` controls visibility and `onChange(false)` fires when the modal
+ * closes itself. `onConfirm(inputValue)` fires for the OK button and
+ * `onCancel()` for the cancel button, the close icon, the mask and Esc.
+ */
 const Modal = (props) => {
   const {
     title,
     content,
     value: valueProp = false,
-    cancelText,
-    okText,
+    cancelText = 'Cancel',
+    okText = 'OK',
     maskClosable = true,
     showHead = true,
     showClose = true,
     showFooter = true,
     showInput = false,
+    showCancelButton = true,
+    showConfirmButton = true,
+    inputPlaceholder = '',
     width = 520,
     closeOnPressEsc = true,
-    styles = {},
+    styles,
     type,
+    header,
+    footer,
     onCancel,
     onConfirm,
     onChange,
@@ -27,144 +46,114 @@ const Modal = (props) => {
     ...restProps
   } = props
 
-  const [visible, setVisible] = useState(valueProp)
-  const [wrapShow, setWrapShow] = useState(valueProp)
+  const [visible, setVisible] = useSyncedState(valueProp, false)
   const [inputValue, setInputValue] = useState('')
+  const { mounted, phase } = usePresence(visible)
+  const handlersRef = useRef({})
 
-  useEffect(() => {
-    setVisible(valueProp)
-    if (valueProp) {
-      setWrapShow(true)
-    }
-  }, [valueProp])
+  const isIconType = Object.prototype.hasOwnProperty.call(ICONS, type)
 
-  useEffect(() => {
-    const handleKeyCode = (evt) => {
-      if (visible && showClose && evt.keyCode === 27) {
-        doClose()
-      }
-    }
-
-    if (closeOnPressEsc) {
-      document.addEventListener('keydown', handleKeyCode)
-      return () => {
-        document.removeEventListener('keydown', handleKeyCode)
-      }
-    }
-  }, [visible, showClose, closeOnPressEsc])
-
-  const iconClassMap = {
-    'success': 'icon-check-circle',
-    'error': 'icon-x-circle',
-    'warning': 'icon-alert-circle',
-    'info': 'icon-info'
-  }
-
-  const iconClass = iconClassMap[type] || ''
-  const isIconType = ['success', 'error', 'warning', 'info'].includes(type)
-  const localeOKText = okText !== undefined ? okText : 'OK'
-  const localeCancelText = cancelText !== undefined ? cancelText : 'Cancel'
-
-  const modalStyle = {
-    width: `${width}px`,
-    ...styles
-  }
-
-  const doClose = () => {
+  const close = (action) => {
     setVisible(false)
-    if (onChange) {
-      onChange(false)
-    }
-    if (onCancel) {
+    if (onChange) onChange(false)
+    if (action === 'confirm') {
+      if (onConfirm) onConfirm(showInput ? inputValue : undefined)
+    } else if (onCancel) {
       onCancel()
     }
-    setTimeout(() => {
-      setWrapShow(false)
-    }, 300)
   }
 
-  const handleMaskClick = () => {
-    if (maskClosable) {
-      doClose()
+  // Always call the latest closure from the global key handler.
+  handlersRef.current.close = close
+
+  useEffect(() => {
+    if (visible) setInputValue('')
+  }, [visible])
+
+  useEffect(() => {
+    if (!visible || !closeOnPressEsc) return
+
+    const handleKeyDown = (evt) => {
+      if (evt.key === 'Escape') handlersRef.current.close('cancel')
     }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [visible, closeOnPressEsc])
+
+  if (!mounted) return null
+
+  const handleWrapperClick = (evt) => {
+    if (maskClosable && evt.target === evt.currentTarget) close('cancel')
   }
 
-  const handleAction = (action) => {
-    if (action === 'confirm') {
-      if (onConfirm) {
-        onConfirm(inputValue)
-      }
-      if (onChange) {
-        onChange(false)
-      }
-    }
-    doClose()
-  }
-
-  const modalWrapperClasses = classNames(
-    'at-modal__wrapper',
-    {
-      'at-modal--hidden': !wrapShow,
-      'at-modal--confirm': isIconType,
-      [`at-modal--confirm-${type}`]: isIconType
-    }
-  )
-
-  if (!wrapShow) return null
+  const hasHeader = showHead && (header || title)
 
   return (
     <div {...restProps}>
-      {visible && (
-        <div className="at-modal__mask" onClick={handleMaskClick} />
-      )}
-      <div className={modalWrapperClasses} onClick={maskClosable ? handleMaskClick : undefined}>
-        {visible && (
-          <div className={classNames('at-modal', className)} style={modalStyle}>
-            {showHead && (
-              <div className="at-modal__header">
-                <div className="at-modal__title">
-                  {title && <p>{title}</p>}
-                </div>
+      <div
+        className={classNames('at-modal__mask', transitionClass('fade', phase))}
+        onClick={() => maskClosable && close('cancel')}
+      />
+      <div
+        className={classNames('at-modal__wrapper', {
+          'at-modal--confirm': isIconType,
+          [`at-modal--confirm-${type}`]: isIconType
+        })}
+        onClick={handleWrapperClick}
+      >
+        <div
+          className={classNames('at-modal', transitionClass('fade', phase), className)}
+          style={{ width: typeof width === 'number' ? `${width}px` : width, ...styles }}
+          role="dialog"
+          aria-modal="true"
+        >
+          {hasHeader && (
+            <div className="at-modal__header">
+              <div className="at-modal__title">
+                {header || <p>{title}</p>}
               </div>
+            </div>
+          )}
+          <div className="at-modal__body">
+            {children !== undefined ? children : (
+              <>
+                {content && <p>{content}</p>}
+                {showInput && (
+                  <div className="at-modal__input">
+                    <Input
+                      autofocus
+                      value={inputValue}
+                      placeholder={inputPlaceholder}
+                      onChange={(evt) => setInputValue(evt.target.value)}
+                      onKeyUp={(evt) => evt.key === 'Enter' && close('confirm')}
+                    />
+                  </div>
+                )}
+              </>
             )}
-            <div className="at-modal__body">
-              {children || (
+          </div>
+          {showFooter && (
+            <div className="at-modal__footer">
+              {footer || (
                 <>
-                  {content && <p>{content}</p>}
-                  {showInput && (
-                    <div className="at-modal__input">
-                      <Input
-                        value={inputValue}
-                        onChange={(val) => setInputValue(val)}
-                        onKeyUp={(e) => {
-                          if (e.keyCode === 13) {
-                            handleAction('confirm')
-                          }
-                        }}
-                      />
-                    </div>
+                  {showCancelButton && (
+                    <Button onClick={() => close('cancel')}>{cancelText}</Button>
+                  )}
+                  {showConfirmButton && (
+                    <Button type="primary" onClick={() => close('confirm')}>{okText}</Button>
                   )}
                 </>
               )}
             </div>
-            {showFooter && (
-              <div className="at-modal__footer">
-                <Button onClick={() => handleAction('cancel')}>
-                  {localeCancelText}
-                </Button>
-                <Button type="primary" onClick={() => handleAction('confirm')}>
-                  {localeOKText}
-                </Button>
-              </div>
-            )}
-            {isIconType && <i className={`icon at-modal__icon ${iconClass}`} />}
-            {showClose && (
-              <span className="at-modal__close" onClick={() => handleAction('cancel')}>
-                <i className="icon icon-x" />
-              </span>
-            )}
-          </div>
-        )}
+          )}
+          {isIconType && <i className={`icon at-modal__icon ${ICONS[type]}`} />}
+          {showClose && (
+            <span className="at-modal__close" onClick={() => close('cancel')}>
+              <i className="icon icon-x" />
+            </span>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -173,4 +162,3 @@ const Modal = (props) => {
 Modal.displayName = 'AtModal'
 
 export default Modal
-

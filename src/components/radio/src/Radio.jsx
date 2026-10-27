@@ -1,8 +1,14 @@
-import React, { useState, useEffect, useContext, createContext } from 'react'
+import React, { useContext, useState, createContext } from 'react'
 import classNames from 'classnames'
+import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
 export const RadioGroupContext = createContext(null)
 
+/**
+ * `label` is the option's value. Standalone, `value` is the currently
+ * selected label; inside a RadioGroup the group's `value` is used.
+ */
 const Radio = (props) => {
   const {
     value: valueProp,
@@ -16,72 +22,53 @@ const Radio = (props) => {
   } = props
 
   const groupContext = useContext(RadioGroupContext)
+  const formItem = useFormItem()
   const isGroup = !!groupContext
 
-  const [store, setStore] = useState(valueProp)
   const [focus, setFocus] = useState(false)
+  const [standaloneValue, setStandaloneValue] = useSyncedState(valueProp, undefined)
 
-  useEffect(() => {
-    if (isGroup && groupContext.value !== undefined) {
-      setStore(groupContext.value)
-    } else if (!isGroup && valueProp !== undefined) {
-      setStore(valueProp)
-    }
-  }, [valueProp, isGroup, groupContext?.value])
-
-  const isChecked = store === label
-
-  const radioClasses = classNames(
-    'at-radio',
-    className
-  )
-
-  const innerClasses = classNames(
-    'at-radio__inner',
-    {
-      'at-radio--focus': focus,
-      'at-radio--checked': isChecked,
-      'at-radio--disabled': disabled
-    }
-  )
+  const selected = isGroup ? groupContext.value : standaloneValue
+  const isChecked = selected === label
+  const isDisabled = disabled || (isGroup && groupContext.disabled)
 
   const handleChange = (evt) => {
-    if (disabled) return
+    if (isDisabled) return
 
-    const newValue = label
-    setStore(newValue)
-
-    if (onChange) {
-      onChange(newValue, evt)
+    if (isGroup) {
+      groupContext.onChange(label)
+    } else {
+      setStandaloneValue(label)
+      if (formItem) formItem.onChange(label)
     }
-
-    if (isGroup && groupContext.onChange) {
-      groupContext.onChange(newValue)
-    }
+    if (onChange) onChange(label, evt)
   }
 
-  const handleFocus = () => setFocus(true)
-  const handleBlur = () => setFocus(false)
-
   return (
-    <label className={radioClasses}>
+    <label className={classNames('at-radio', className)}>
       <span className="at-radio__input">
-        <span className={innerClasses} />
+        <span
+          className={classNames('at-radio__inner', {
+            'at-radio--focus': focus,
+            'at-radio--checked': isChecked,
+            'at-radio--disabled': isDisabled
+          })}
+        />
         <input
           type="radio"
           className="at-radio__original"
           name={name}
           value={label}
           checked={isChecked}
-          disabled={disabled}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          disabled={isDisabled}
           {...restProps}
+          onChange={handleChange}
+          onFocus={() => setFocus(true)}
+          onBlur={() => setFocus(false)}
         />
       </span>
       <span className="at-radio__label">
-        {children || label}
+        {children !== undefined ? children : label}
       </span>
     </label>
   )
@@ -90,4 +77,3 @@ const Radio = (props) => {
 Radio.displayName = 'AtRadio'
 
 export default Radio
-

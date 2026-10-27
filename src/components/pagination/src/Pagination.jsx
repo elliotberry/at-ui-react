@@ -1,17 +1,41 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import classNames from 'classnames'
+import Select from '../../select/src/Select'
+import Option from '../../select/src/Option'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
+const TEXTS = {
+  prevText: 'Previous Page',
+  nextText: 'Next Page',
+  prev5Text: 'Previous 5 Pages',
+  next5Text: 'Next 5 Pages',
+  total: 'Total',
+  items: 'items',
+  goto: 'Goto',
+  pageText: 'page',
+  pageSize: '/ page'
+}
+
+const ALLOWED_KEYS = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Home', 'End']
+
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max)
+
+/**
+ * `onChange(page)` fires when the page changes, `onPageSizeChange(size)` when
+ * a new page size is picked from the sizer.
+ */
 const Pagination = (props) => {
   const {
     current: currentProp = 1,
-    total,
-    pageSize = 10,
+    total = 0,
+    pageSize: pageSizeProp = 10,
     size,
     simple = false,
     showTotal = false,
     showQuickjump = false,
     showSizer = false,
     pageSizeOpts = [10, 20, 30, 40],
+    texts: textsProp,
     onChange,
     onPageSizeChange,
     className,
@@ -19,96 +43,63 @@ const Pagination = (props) => {
     ...restProps
   } = props
 
-  const [currentPage, setCurrentPage] = useState(currentProp)
-  const [currentPageSize, setCurrentPageSize] = useState(pageSize)
-  const [jumpPageNum, setJumpPageNum] = useState(currentProp)
+  const texts = { ...TEXTS, ...textsProp }
 
-  useEffect(() => {
-    setCurrentPage(currentProp)
-    setJumpPageNum(currentProp)
-  }, [currentProp])
-
-  useEffect(() => {
-    setCurrentPageSize(pageSize)
-  }, [pageSize])
+  const [currentPage, setCurrentPage] = useSyncedState(currentProp, 1)
+  const [currentPageSize, setCurrentPageSize] = useSyncedState(pageSizeProp, 10)
+  // Text typed in the jump box; null means "show the current page".
+  const [jumpText, setJumpText] = useState(null)
 
   const totalPage = Math.ceil(total / currentPageSize) || 1
+  const jumpValue = jumpText !== null ? jumpText : String(currentPage)
 
-  // Hardcoded English strings (locale removed)
-  const texts = {
-    prevText: 'Previous Page',
-    nextText: 'Next Page',
-    total: 'Total',
-    items: 'items',
-    goto: 'Goto',
-    pageText: 'page',
-    prev5Text: 'Previous 5 Pages',
-    next5Text: 'Next 5 Pages'
-  }
+  const changePage = (page, pageTotal = totalPage) => {
+    const num = clamp(parseInt(page, 10) || 1, 1, pageTotal)
+    setJumpText(null)
 
-  const changePage = (page) => {
-    let num = (page || jumpPageNum || 1) | 0
-    num = num > totalPage ? totalPage : num
-    num = num < 1 ? 1 : num
-
-    if (currentPage !== num) {
-      setJumpPageNum(num)
+    if (num !== currentPage) {
       setCurrentPage(num)
-      if (onChange) {
-        onChange(num)
-      }
+      if (onChange) onChange(num)
     }
   }
 
   const handlePrev = () => {
-    if (currentPage <= 1) return
-    changePage(currentPage - 1)
+    if (currentPage > 1) changePage(currentPage - 1)
   }
 
   const handleNext = () => {
-    if (currentPage >= totalPage) return
-    changePage(currentPage + 1)
+    if (currentPage < totalPage) changePage(currentPage + 1)
   }
 
-  const handleJumpPrev = () => {
-    const page = currentPage - 5
-    changePage(page > 0 ? page : 1)
-  }
+  const handleJumpPrev = () => changePage(currentPage - 5)
+  const handleJumpNext = () => changePage(currentPage + 5)
 
-  const handleJumpNext = () => {
-    const page = currentPage + 5
-    changePage(page > totalPage ? totalPage : page)
-  }
-
-  const handleKeydown = (evt) => {
-    const key = evt.keyCode
-    if (!((key >= 48 && key <= 57) || key === 8 || key === 37 || key === 39)) {
+  const handleKeyDown = (evt) => {
+    if (evt.ctrlKey || evt.metaKey) return
+    if (!/^\d$/.test(evt.key) && !ALLOWED_KEYS.includes(evt.key)) {
       evt.preventDefault()
     }
   }
 
-  const handleKeyup = (evt) => {
-    const key = evt.keyCode
-    const numVal = parseInt(evt.target.value) || 1
-
-    if (key === 40) {
+  const handleJumpKeyUp = (evt) => {
+    if (evt.key === 'Enter') {
+      changePage(jumpValue)
+    } else if (evt.key === 'ArrowDown') {
       handlePrev()
-    } else if (key === 38) {
+    } else if (evt.key === 'ArrowUp') {
       handleNext()
-    } else if (key === 13) {
-      let page = numVal > totalPage ? totalPage : numVal
-      page = numVal <= 0 ? 1 : page
-      evt.target.value = page
-      changePage(page)
     }
   }
 
-  const changeSize = (size) => {
+  const changeSize = (newSize) => {
+    const size = Number(newSize)
     setCurrentPageSize(size)
-    changePage(1)
-    if (onPageSizeChange) {
-      onPageSizeChange(size)
+    // The page count changes with the page size, so go back to page 1.
+    if (currentPage !== 1) {
+      setCurrentPage(1)
+      if (onChange) onChange(1)
     }
+    if (onPageSizeChange) onPageSizeChange(size)
   }
 
   const paginationClasses = classNames(
@@ -120,98 +111,92 @@ const Pagination = (props) => {
     className
   )
 
-  // Simple pagination
+  const prev = (
+    <li
+      className={classNames('at-pagination__prev', {
+        'at-pagination--disabled': currentPage === 1
+      })}
+      onClick={handlePrev}
+      title={texts.prevText}
+    >
+      <i className="icon icon-chevron-left" />
+    </li>
+  )
+
+  const next = (
+    <li
+      className={classNames('at-pagination__next', {
+        'at-pagination--disabled': currentPage === totalPage
+      })}
+      onClick={handleNext}
+      title={texts.nextText}
+    >
+      <i className="icon icon-chevron-right" />
+    </li>
+  )
+
   if (simple) {
     return (
       <ul className={paginationClasses} {...restProps}>
-        <li
-          className={classNames('at-pagination__prev', {
-            'at-pagination--disabled': currentPage === 1
-          })}
-          onClick={handlePrev}
-          title={texts.prevText}
-        >
-          <i className="icon icon-chevron-left" />
-        </li>
+        {prev}
         <div className="at-pagination__simple-paging">
           <input
             type="text"
             className="at-input__original"
-            value={currentPage}
-            onKeyDown={handleKeydown}
-            onKeyUp={handleKeyup}
-            onChange={(e) => setJumpPageNum(parseInt(e.target.value) || 1)}
+            value={jumpValue}
+            onKeyDown={handleKeyDown}
+            onKeyUp={handleJumpKeyUp}
+            onChange={(evt) => setJumpText(evt.target.value)}
+            onBlur={() => setJumpText(null)}
           />
           <span>/</span>
           <span className="at-pagination__paging-total">{totalPage}</span>
         </div>
-        <li
-          className={classNames('at-pagination__next', {
-            'at-pagination--disabled': currentPage === totalPage
-          })}
-          onClick={handleNext}
-          title={texts.nextText}
-        >
-          <i className="icon icon-chevron-right" />
-        </li>
+        {next}
       </ul>
     )
   }
 
-  // Full pagination
+  // Visible window of page numbers (used when there are fewer than 9 pages)
   const pageRange = []
-  const visiblePage = totalPage >= 5 ? 5 : totalPage
+  const visiblePage = Math.min(totalPage, 5)
   let start = 1
 
-  if (currentPage + (visiblePage / 2) > totalPage) {
-    start = totalPage - visiblePage + 1
-    start = start > 0 ? start : 1
-  } else if (currentPage - (visiblePage / 2) > 0) {
-    start = Math.ceil(currentPage - (visiblePage / 2))
+  if (currentPage + visiblePage / 2 > totalPage) {
+    start = Math.max(totalPage - visiblePage + 1, 1)
+  } else if (currentPage - visiblePage / 2 > 0) {
+    start = Math.ceil(currentPage - visiblePage / 2)
   }
 
-  for (let i = 0; i < visiblePage && i < totalPage; i++) {
+  for (let i = 0; i < visiblePage; i++) {
     pageRange.push(start + i)
   }
+
+  const item = (num, extra) => (
+    <li
+      key={num}
+      className={classNames('at-pagination__item', {
+        'at-pagination__item--active': currentPage === num
+      }, extra)}
+      onClick={() => changePage(num)}
+    >
+      {num}
+    </li>
+  )
 
   return (
     <ul className={paginationClasses} {...restProps}>
       {showTotal && (
         <span className="at-pagination__total">
-          {children || `${texts.total} ${total} ${texts.items}`}
+          {children !== undefined ? children : `${texts.total} ${total} ${texts.items}`}
         </span>
       )}
-      <li
-        className={classNames('at-pagination__prev', {
-          'at-pagination--disabled': currentPage === 1
-        })}
-        onClick={handlePrev}
-        title={t('at.pagination.prevText')}
-      >
-        <i className="icon icon-chevron-left" />
-      </li>
+      {prev}
       {totalPage < 9 ? (
-        pageRange.map(num => (
-          <li
-            key={num}
-            className={classNames('at-pagination__item', {
-              'at-pagination__item--active': currentPage === num
-            })}
-            onClick={() => changePage(num)}
-          >
-            {num}
-          </li>
-        ))
+        pageRange.map(num => item(num))
       ) : (
         <>
-          <li
-            className={classNames('at-pagination__item', {
-              'at-pagination__item--active': currentPage === 1
-            })}
-            onClick={() => changePage(1)}
-          >
-            1
-          </li>
+          {item(1)}
           {currentPage > 4 && (
             <li
               className="at-pagination__item at-pagination__item--jump-prev"
@@ -221,31 +206,11 @@ const Pagination = (props) => {
               <i className="icon icon-chevrons-left" />
             </li>
           )}
-          {currentPage > 3 && (
-            <li className="at-pagination__item" onClick={() => changePage(currentPage - 2)}>
-              {currentPage - 2}
-            </li>
-          )}
-          {currentPage > 2 && (
-            <li className="at-pagination__item" onClick={() => changePage(currentPage - 1)}>
-              {currentPage - 1}
-            </li>
-          )}
-          {currentPage !== 1 && currentPage !== totalPage && (
-            <li className="at-pagination__item at-pagination__item--active">
-              {currentPage}
-            </li>
-          )}
-          {currentPage < totalPage - 1 && (
-            <li className="at-pagination__item" onClick={() => changePage(currentPage + 1)}>
-              {currentPage + 1}
-            </li>
-          )}
-          {currentPage < totalPage - 2 && (
-            <li className="at-pagination__item" onClick={() => changePage(currentPage + 2)}>
-              {currentPage + 2}
-            </li>
-          )}
+          {currentPage > 3 && item(currentPage - 2)}
+          {currentPage > 2 && item(currentPage - 1)}
+          {currentPage !== 1 && currentPage !== totalPage && item(currentPage)}
+          {currentPage < totalPage - 1 && item(currentPage + 1)}
+          {currentPage < totalPage - 2 && item(currentPage + 2)}
           {currentPage < totalPage - 3 && (
             <li
               className="at-pagination__item at-pagination__item--jump-next"
@@ -255,41 +220,30 @@ const Pagination = (props) => {
               <i className="icon icon-chevrons-right" />
             </li>
           )}
-          {totalPage > 1 && (
-            <li
-              className={classNames('at-pagination__item', {
-                'at-pagination__item--active': currentPage === totalPage
-              })}
-              onClick={() => changePage(totalPage)}
-            >
-              {totalPage}
-            </li>
-          )}
+          {item(totalPage)}
         </>
       )}
-      <li
-        className={classNames('at-pagination__next', {
-          'at-pagination--disabled': currentPage === totalPage
-        })}
-        onClick={handleNext}
-        title={t('at.pagination.nextText')}
-      >
-        <i className="icon icon-chevron-right" />
-      </li>
+      {next}
+      {showSizer && (
+        <div className="at-pagination__sizer">
+          <Select value={currentPageSize} size={size} onChange={changeSize}>
+            {pageSizeOpts.map(opt => (
+              <Option key={opt} value={opt}>{`${opt} ${texts.pageSize}`}</Option>
+            ))}
+          </Select>
+        </div>
+      )}
       {showQuickjump && (
         <div className="at-pagination__quickjump">
           <span>{texts.goto}</span>
           <input
             type="text"
             className="at-input__original"
-            value={jumpPageNum}
-            onKeyDown={handleKeydown}
-            onKeyUp={(e) => {
-              if (e.keyCode === 13) {
-                changePage()
-              }
-            }}
-            onChange={(e) => setJumpPageNum(parseInt(e.target.value) || 1)}
+            value={jumpValue}
+            onKeyDown={handleKeyDown}
+            onKeyUp={(evt) => evt.key === 'Enter' && changePage(jumpValue)}
+            onChange={(evt) => setJumpText(evt.target.value)}
+            onBlur={() => setJumpText(null)}
           />
           <span>{texts.pageText}</span>
         </div>
@@ -301,4 +255,3 @@ const Pagination = (props) => {
 Pagination.displayName = 'AtPagination'
 
 export default Pagination
-

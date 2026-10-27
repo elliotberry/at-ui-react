@@ -1,69 +1,55 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import classNames from 'classnames'
+import { transitionClass } from '../../../utils/transition'
 
+const ICONS = {
+  success: 'icon-check-circle',
+  error: 'icon-x-circle',
+  warning: 'icon-alert-circle',
+  info: 'icon-info',
+  loading: 'icon-loader'
+}
+
+/**
+ * A single message bubble. Normally created through the `Message(...)`
+ * function; `onClose` is called when `duration` (ms, 0 = never) has elapsed.
+ */
 const Message = (props) => {
   const {
     message = '',
     duration = 3000,
     type = 'info',
     icon = '',
+    closing = false,
     onClose,
-    top,
     className,
+    style,
     ...restProps
   } = props
 
-  const [visible, setVisible] = useState(false)
-  const [closed, setClosed] = useState(false)
+  const onCloseRef = useRef(onClose)
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
-    setVisible(true)
-    if (duration > 0) {
-      const timer = setTimeout(() => {
-        if (!closed) {
-          close()
-        }
-      }, duration)
-      return () => clearTimeout(timer)
-    }
-  }, [duration, closed])
-
-  const iconClassMap = {
-    'success': 'icon-check-circle',
-    'error': 'icon-x-circle',
-    'warning': 'icon-alert-circle',
-    'info': 'icon-info',
-    'loading': 'icon-loader'
-  }
-
-  const iconClass = icon || iconClassMap[type] || 'icon-info'
-
-  const close = () => {
-    setClosed(true)
-    setVisible(false)
-    if (onClose) {
-      onClose()
-    }
-  }
-
-  const messageClasses = classNames(
-    'at-message',
-    {
-      [`at-message--${type}`]: type
-    },
-    className
-  )
-
-  if (!visible) return null
+    if (!duration || closing) return
+    const timer = setTimeout(() => onCloseRef.current && onCloseRef.current(), duration)
+    return () => clearTimeout(timer)
+  }, [duration, closing])
 
   return (
-    <div
-      className="at-message__wrapper"
-      style={{ top: top ? `${top}px` : 'auto' }}
-      {...restProps}
-    >
-      <div className={messageClasses}>
-        <i className={`icon at-message__icon ${iconClass}`} />
+    <div className="at-message__wrapper" style={style} {...restProps}>
+      <div
+        className={classNames(
+          'at-message',
+          { [`at-message--${type}`]: type },
+          transitionClass('move-up', closing ? 'leave' : 'enter'),
+          className
+        )}
+        role="alert"
+      >
+        <i className={`icon at-message__icon ${icon || ICONS[type] || ''}`} />
         <span className="at-message__content">{message}</span>
       </div>
     </div>
@@ -72,23 +58,4 @@ const Message = (props) => {
 
 Message.displayName = 'AtMessage'
 
-// Static methods for programmatic usage
-Message.info = (config) => {
-  // Would create a portal and render Message component
-  console.log('Message.info', config)
-}
-
-Message.success = (config) => {
-  console.log('Message.success', config)
-}
-
-Message.error = (config) => {
-  console.log('Message.error', config)
-}
-
-Message.warning = (config) => {
-  console.log('Message.warning', config)
-}
-
 export default Message
-

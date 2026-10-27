@@ -1,42 +1,35 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import classNames from 'classnames'
 import { RadioGroupContext } from './Radio'
+import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
 const RadioGroup = (props) => {
   const {
     value: valueProp,
+    defaultValue,
     size,
     fill,
     textColor,
+    disabled = false,
     onChange,
     className,
     children,
     ...restProps
   } = props
 
-  const [value, setValue] = useState(valueProp)
-
-  useEffect(() => {
-    setValue(valueProp)
-  }, [valueProp])
+  const [value, setValue] = useSyncedState(valueProp, defaultValue)
+  const formItem = useFormItem()
 
   const handleChange = (newValue) => {
+    if (newValue === value) return
     setValue(newValue)
-    if (onChange) {
-      onChange(newValue)
-    }
-  }
-
-  const contextValue = {
-    value,
-    size,
-    fill,
-    textColor,
-    onChange: handleChange
+    if (onChange) onChange(newValue)
+    if (formItem) formItem.onChange(newValue)
   }
 
   return (
-    <RadioGroupContext.Provider value={contextValue}>
+    <RadioGroupContext.Provider value={{ value, size, fill, textColor, disabled, onChange: handleChange }}>
       <div className={classNames('at-radio-group', className)} {...restProps}>
         {children}
       </div>
@@ -47,4 +40,3 @@ const RadioGroup = (props) => {
 RadioGroup.displayName = 'AtRadioGroup'
 
 export default RadioGroup
-

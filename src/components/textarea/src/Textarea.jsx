@@ -1,10 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useCallback, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react'
 import classNames from 'classnames'
 import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
+import { calcTextareaHeight } from './utils'
 
+/**
+ * Multi-line input. `onChange` receives the native change event.
+ */
 const Textarea = React.forwardRef((props, ref) => {
   const {
     value: valueProp,
+    defaultValue,
     name,
     placeholder,
     readonly = false,
@@ -24,94 +30,44 @@ const Textarea = React.forwardRef((props, ref) => {
     ...restProps
   } = props
 
-  const [store, setStore] = useState(valueProp || '')
+  const [store, setStore] = useSyncedState(valueProp, defaultValue !== undefined ? defaultValue : '')
   const [calculateStyle, setCalculateStyle] = useState({})
-  const textareaRef = ref || useRef(null)
+  const textareaRef = useRef(null)
   const formItem = useFormItem()
 
-  useEffect(() => {
-    if (valueProp !== store) {
-      setStore(valueProp || '')
-    }
-  }, [valueProp])
+  useImperativeHandle(ref, () => textareaRef.current)
 
-  useEffect(() => {
-    resizeTextarea()
-  }, [store, autosize, minRows, maxRows])
-
-  const resizeTextarea = () => {
+  const resizeTextarea = useCallback(() => {
     if (!autosize && !minRows && !maxRows) return
     if (!textareaRef.current) return
 
-    // Simplified resize logic - can be enhanced later
-    const textarea = textareaRef.current
-    const style = {
-      resize: resize
-    }
+    setCalculateStyle(calcTextareaHeight(
+      textareaRef.current,
+      minRows ? Number(minRows) : 1,
+      maxRows ? Number(maxRows) : null
+    ))
+  }, [autosize, minRows, maxRows])
 
-    if (autosize || minRows || maxRows) {
-      textarea.style.height = 'auto'
-      const scrollHeight = textarea.scrollHeight
-      const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight, 10) || 20
-
-      if (minRows) {
-        style.minHeight = `${lineHeight * minRows}px`
-      }
-      if (maxRows) {
-        style.maxHeight = `${lineHeight * maxRows}px`
-      }
-      if (autosize && !maxRows) {
-        style.height = `${scrollHeight}px`
-      }
-    }
-
-    setCalculateStyle(style)
-  }
-
-  const textareaStyle = {
-    ...calculateStyle,
-    resize: resize
-  }
+  useLayoutEffect(() => {
+    resizeTextarea()
+  }, [store, resizeTextarea])
 
   const textareaClasses = classNames(
     'at-textarea',
-    {
-      'at-textarea--disabled': disabled
-    },
+    { 'at-textarea--disabled': disabled },
     className
   )
 
-  const handleFocus = (evt) => {
-    if (onFocus) {
-      onFocus(evt)
-    }
-  }
-
   const handleBlur = (evt) => {
-    if (onBlur) {
-      onBlur(evt)
-    }
-    if (formItem && formItem.onBlur) {
-      formItem.onBlur(store)
-    }
+    if (onBlur) onBlur(evt)
+    if (formItem) formItem.onBlur(store)
   }
 
-  const handleInput = (evt) => {
+  const handleChange = (evt) => {
     const newValue = evt.target.value
     setStore(newValue)
-
-    if (onChange) {
-      // Support both React standard (event) and custom (value) onChange signatures
-      if (onChange.length === 1) {
-        onChange(evt)
-      } else {
-        onChange(newValue, evt)
-      }
-    }
-
-    if (formItem && formItem.onChange) {
-      formItem.onChange(newValue)
-    }
+    if (onChange) onChange(evt)
+    if (formItem) formItem.onChange(newValue)
   }
 
   return (
@@ -123,16 +79,16 @@ const Textarea = React.forwardRef((props, ref) => {
         name={name}
         placeholder={placeholder}
         disabled={disabled}
-        style={textareaStyle}
+        style={{ ...calculateStyle, resize }}
         readOnly={readonly}
         rows={rows}
         autoFocus={autofocus}
         maxLength={maxlength}
         minLength={minlength}
-        onInput={handleInput}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
         {...restProps}
+        onFocus={onFocus}
+        onBlur={handleBlur}
+        onChange={handleChange}
       />
     </div>
   )
@@ -141,4 +97,3 @@ const Textarea = React.forwardRef((props, ref) => {
 Textarea.displayName = 'AtTextarea'
 
 export default Textarea
-

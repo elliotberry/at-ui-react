@@ -2,45 +2,32 @@ import React, { useContext } from 'react'
 import classNames from 'classnames'
 import { BreadcrumbContext } from './Breadcrumb'
 
+/**
+ * Renders a link when `href` is given. For client-side routing pass your own
+ * `onClick` (e.g. calling the router's navigate) together with `href`.
+ */
 const BreadcrumbItem = (props) => {
   const {
     href,
-    to,
-    replace = false,
+    target,
     onClick,
     className,
     children,
     ...restProps
   } = props
 
-  const { separator } = useContext(BreadcrumbContext)
-
-  const handleClick = (evt) => {
-    if (onClick) {
-      onClick(evt)
-    }
-
-    if (href) {
-      window.location.href = href
-    } else if (to) {
-      // Router navigation - would need react-router integration
-      // For now, just prevent default
-      evt.preventDefault()
-    }
-  }
-
-  const breadcrumbItemClasses = classNames('at-breadcrumb__item', className)
+  const { separator = '/' } = useContext(BreadcrumbContext)
 
   return (
-    <span className={breadcrumbItemClasses} {...restProps}>
-      {(href || (to && Object.keys(to).length > 0)) ? (
-        <a className="at-breadcrumb__link" href={href} onClick={handleClick}>
+    <span className={classNames('at-breadcrumb__item', className)} {...restProps}>
+      {href ? (
+        <a className="at-breadcrumb__link" href={href} target={target} onClick={onClick}>
           {children}
         </a>
       ) : (
-        <span className="at-breadcrumb__text">{children}</span>
+        <span className="at-breadcrumb__text" onClick={onClick}>{children}</span>
       )}
-      <span className="at-breadcrumb__separator" dangerouslySetInnerHTML={{ __html: separator }} />
+      <span className="at-breadcrumb__separator">{separator}</span>
     </span>
   )
 }
@@ -48,4 +35,3 @@ const BreadcrumbItem = (props) => {
 BreadcrumbItem.displayName = 'AtBreadcrumbItem'
 
 export default BreadcrumbItem
-

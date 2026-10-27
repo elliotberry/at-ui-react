@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import classNames from 'classnames'
+import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
+/**
+ * `onChange(value)` fires on click; `onHoverChange(value)` while hovering.
+ * With `allowHalf` the left half of a star selects `n - 0.5`.
+ */
 const Rate = (props) => {
   const {
-    value: valueProp = 0,
+    value: valueProp,
+    defaultValue = 0,
     count = 5,
     disabled = false,
     allowHalf = false,
@@ -16,106 +23,66 @@ const Rate = (props) => {
     ...restProps
   } = props
 
-  const [currentValue, setCurrentValue] = useState(valueProp)
-  const [hoverIndex, setHoverIndex] = useState(-1)
-  const [lastHoverIndex, setLastHoverIndex] = useState(-1)
-  const [isHoverRate, setIsHoverRate] = useState(false)
-  const [isHalf, setIsHalf] = useState(allowHalf)
+  const [currentValue, setCurrentValue] = useSyncedState(valueProp, defaultValue)
+  // Value previewed under the pointer, or null when not hovering.
+  const [hoverValue, setHoverValue] = useState(null)
+  const formItem = useFormItem()
 
-  useEffect(() => {
-    setCurrentValue(valueProp)
-    checkIsHalf(valueProp)
-  }, [valueProp])
+  const displayValue = hoverValue !== null ? hoverValue : currentValue
 
-  const checkIsHalf = (val) => {
-    setIsHalf(allowHalf && val.toString().indexOf('.') >= 0)
-  }
-
-  const calcClass = (index) => {
-    const STAR_ON_CLASS_NAME = 'at-rate__item--on'
-    const STAR_OFF_CLASS_NAME = 'at-rate__item--off'
-    const STAR_HALF_CLASS_NAME = 'at-rate__item--half'
-
-    const isHalfStar = isHalf
-    const isHoverStar = hoverIndex !== -1
-    const currentIndex = isHoverStar ? hoverIndex : currentValue
-    const lastItemIndex = Math.ceil(currentIndex)
-
+  const starState = (index) => {
+    const isHalf = allowHalf && displayValue === index - 0.5
+    const isOn = displayValue >= index
     return {
-      [STAR_ON_CLASS_NAME]: isHalfStar ? index < lastItemIndex : index <= lastItemIndex,
-      [STAR_HALF_CLASS_NAME]: (index === lastItemIndex) && isHalfStar,
-      [STAR_OFF_CLASS_NAME]: index > lastItemIndex
+      'at-rate__item--on': isOn || isHalf,
+      'at-rate__item--half': isHalf,
+      'at-rate__item--off': !isOn && !isHalf
     }
   }
 
-  const overRateHandle = () => {
-    if (disabled) return
-    setIsHoverRate(true)
+  const valueAt = (index, evt) => {
+    const isHalfStar = allowHalf && evt.target.getAttribute('type') === 'half'
+    return isHalfStar ? index - 0.5 : index
   }
 
-  const leaveRateHandle = () => {
+  const handleMove = (index, evt) => {
     if (disabled) return
-    setIsHoverRate(false)
-    setHoverIndex(-1)
-    setLastHoverIndex(-1)
-    checkIsHalf(currentValue)
-  }
-
-  const moveStarHandle = (index, event) => {
-    if (disabled) return
-    setHoverIndex(index)
-
-    const isHalfStar = allowHalf && event.target.getAttribute('type') === 'half'
-    setIsHalf(isHalfStar)
-
-    const exactlyHoverIndex = isHalfStar ? index - 0.5 : index
-    if (exactlyHoverIndex !== lastHoverIndex) {
-      if (onHoverChange) {
-        onHoverChange(exactlyHoverIndex)
-      }
-    }
-
-    setLastHoverIndex(exactlyHoverIndex)
-  }
-
-  const confirmValue = (index) => {
-    if (disabled) return
-    const newValue = isHalf ? index - 0.5 : index
-    setCurrentValue(newValue)
-    if (onChange) {
-      onChange(newValue)
+    const next = valueAt(index, evt)
+    if (next !== hoverValue) {
+      setHoverValue(next)
+      if (onHoverChange) onHoverChange(next)
     }
   }
 
-  const rateClasses = classNames(
-    'at-rate__list',
-    {
-      'at-rate--disabled': disabled
-    },
-    className
-  )
+  const handleClick = (index, evt) => {
+    if (disabled) return
+    const next = valueAt(index, evt)
+    setCurrentValue(next)
+    if (onChange) onChange(next)
+    if (formItem) formItem.onChange(next)
+  }
 
   return (
-    <div className="at-rate" {...restProps}>
-      <ul className={rateClasses} onMouseOver={overRateHandle} onMouseLeave={leaveRateHandle}>
-        {Array.from({ length: count }).map((_, index) => {
-          const itemIndex = index + 1
-          return (
-            <li key={itemIndex} className={classNames('at-rate__item', calcClass(itemIndex))}>
-              <i
-                className={['icon', 'at-rate__icon', icon].join(' ')}
-                onMouseMove={(e) => moveStarHandle(itemIndex, e)}
-                onClick={() => confirmValue(itemIndex)}
-              >
-                <span className={['icon', 'at-rate__left', icon].join(' ')} type="half" />
-              </i>
-            </li>
-          )
-        })}
+    <div className={classNames('at-rate', className)} {...restProps}>
+      <ul
+        className={classNames('at-rate__list', { 'at-rate--disabled': disabled })}
+        onMouseLeave={() => !disabled && setHoverValue(null)}
+      >
+        {Array.from({ length: count }, (_, i) => i + 1).map(index => (
+          <li key={index} className={classNames('at-rate__item', starState(index))}>
+            <i
+              className={`icon at-rate__icon ${icon}`}
+              onMouseMove={(evt) => handleMove(index, evt)}
+              onClick={(evt) => handleClick(index, evt)}
+            >
+              <span className={`icon at-rate__left ${icon}`} type="half" />
+            </i>
+          </li>
+        ))}
       </ul>
       {showText && (
         <div className="at-rate__text">
-          {children || currentValue}
+          {children !== undefined ? children : currentValue}
         </div>
       )}
     </div>
@@ -125,4 +92,3 @@ const Rate = (props) => {
 Rate.displayName = 'AtRate'
 
 export default Rate
-

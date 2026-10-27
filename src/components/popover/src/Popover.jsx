@@ -1,16 +1,18 @@
-import React, { useEffect } from 'react'
+import React, { useImperativeHandle } from 'react'
+import classNames from 'classnames'
 import { usePopover } from '../../../hooks/usePopover'
 import { useClickOutside } from '../../../hooks/useClickOutside'
-import classNames from 'classnames'
 
+/**
+ * `title` and `content` are React nodes (strings are rendered as text).
+ */
 const Popover = React.forwardRef((props, ref) => {
   const {
     trigger = 'click',
-    transition = 'fade',
     placement = 'top',
     title,
     content,
-    value: valueProp = false,
+    value,
     onToggle,
     className,
     children,
@@ -22,58 +24,40 @@ const Popover = React.forwardRef((props, ref) => {
     position,
     triggerRef,
     popoverRef,
+    triggerProps,
+    popoverProps,
+    toggle,
+    showPopover,
     hidePopover
-  } = usePopover({
-    trigger,
-    placement,
-    value: valueProp,
-    onToggle
-  })
+  } = usePopover({ trigger, placement, value, onToggle })
 
   const parentRef = useClickOutside(() => {
-    if (show) {
-      hidePopover()
-    }
+    if (show && trigger !== 'manual') hidePopover()
   })
 
-  useEffect(() => {
-    if (valueProp !== undefined) {
-      // Controlled mode
-    }
-  }, [valueProp])
-
-  const popoverClasses = classNames(
-    'at-popover',
-    className
-  )
-
-  const popperClasses = classNames(
-    'at-popover__popper',
-    {
-      [`at-popover--${placement}`]: placement
-    }
-  )
+  useImperativeHandle(ref, () => ({
+    toggle,
+    showPopover,
+    hidePopover,
+    get show () { return show }
+  }), [toggle, showPopover, hidePopover, show])
 
   return (
-    <div className={popoverClasses} ref={parentRef} {...restProps}>
-      <span className="at-popover__trigger" ref={triggerRef}>
+    <div className={classNames('at-popover', className)} ref={parentRef} {...restProps}>
+      <span className="at-popover__trigger" ref={triggerRef} {...triggerProps}>
         {children}
       </span>
 
       {show && (
         <div
-          className={popperClasses}
+          className={classNames('at-popover__popper', `at-popover--${placement}`)}
           ref={popoverRef}
-          style={{
-            top: `${position.top}px`,
-            left: `${position.left}px`
-          }}
+          style={{ top: `${position.top}px`, left: `${position.left}px` }}
+          {...popoverProps}
         >
           <div className="at-popover__arrow" />
-          {title && (
-            <div className="at-popover__title" dangerouslySetInnerHTML={{ __html: title }} />
-          )}
-          <div className="at-popover__content" dangerouslySetInnerHTML={{ __html: content }} />
+          {title && <div className="at-popover__title">{title}</div>}
+          <div className="at-popover__content">{content}</div>
         </div>
       )}
     </div>
@@ -83,4 +67,3 @@ const Popover = React.forwardRef((props, ref) => {
 Popover.displayName = 'AtPopover'
 
 export default Popover
-

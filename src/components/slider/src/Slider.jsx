@@ -1,11 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import classNames from 'classnames'
-import InputNumber from '../../input-number/src/InputNumber'
 import Tooltip from '../../tooltip/src/Tooltip'
+import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
+const decimals = (num) => {
+  const part = String(num).split('.')[1]
+  return part ? part.length : 0
+}
+
+const clamp = (num, min, max) => Math.min(Math.max(num, min), max)
+
+/**
+ * `onChange(value)` fires whenever the value changes by click, drag or keyboard.
+ */
 const Slider = (props) => {
   const {
-    value: valueProp = 0,
+    value: valueProp,
+    defaultValue = 0,
     disabled = false,
     min = 0,
     max = 100,
@@ -15,172 +27,112 @@ const Slider = (props) => {
     ...restProps
   } = props
 
-  const [currentValue, setCurrentValue] = useState(valueProp)
+  const [rawValue, setValue] = useSyncedState(valueProp, defaultValue)
   const [isHover, setIsHover] = useState(false)
   const [isDrag, setIsDrag] = useState(false)
-  const [startX, setStartX] = useState(0)
-  const [currentX, setCurrentX] = useState(0)
-  const [startPos, setStartPos] = useState(0)
-  const [newPos, setNewPos] = useState(null)
-  const sliderRef = useRef(null)
-  const tooltipRef = useRef(null)
+  const trackRef = useRef(null)
+  const formItem = useFormItem()
 
+  const value = typeof rawValue === 'number' && !Number.isNaN(rawValue)
+    ? clamp(rawValue, min, max)
+    : min
+  const percent = max === min ? 0 : (value - min) * 100 / (max - min)
+
+  const update = useCallback((next) => {
+    if (next === value) return
+    setValue(next)
+    if (onChange) onChange(next)
+    if (formItem) formItem.onChange(next)
+  }, [value, setValue, onChange, formItem])
+
+  // Maps a pointer x-coordinate onto the nearest step value.
+  const valueFromClientX = useCallback((clientX) => {
+    const rect = trackRef.current.getBoundingClientRect()
+    const ratio = rect.width ? clamp((clientX - rect.left) / rect.width, 0, 1) : 0
+    const steps = Math.round(ratio * (max - min) / step)
+    const precision = Math.max(decimals(step), decimals(min))
+    return clamp(parseFloat((min + steps * step).toFixed(precision)), min, max)
+  }, [min, max, step])
+
+  // While dragging, follow the pointer anywhere on the page.
   useEffect(() => {
-    let val = valueProp
-    if (typeof val !== 'number' || isNaN(val) || val < min) {
-      val = min
-    } else if (val > max) {
-      val = max
+    if (!isDrag) return
+
+    const handleMove = (evt) => update(valueFromClientX(evt.clientX))
+    const handleUp = () => setIsDrag(false)
+
+    window.addEventListener('mousemove', handleMove)
+    window.addEventListener('mouseup', handleUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('mouseup', handleUp)
     }
-    setCurrentValue(val)
-    setPosition((val - min) * 100 / (max - min))
-  }, [valueProp, min, max])
-
-  const getSliderWidth = () => {
-    if (!sliderRef.current) return 0
-    return sliderRef.current.offsetWidth
-  }
-
-  const currentPosition = `${(currentValue - min) * 100 / (max - min)}%`
-
-  const setPosition = (pos) => {
-    if (pos < 0) pos = 0
-    if (pos > 100) pos = 100
-
-    const lengthPerStep = 100 / ((max - min) / step)
-    const steps = Math.round(pos / lengthPerStep)
-    let value = (steps * lengthPerStep * (max - min) * 0.01) + min
-    value = parseFloat(value.toFixed(0))
-
-    setCurrentValue(value)
-    if (onChange) {
-      onChange(value)
-    }
-  }
-
-  const handleMouseEnter = () => {
-    setIsHover(true)
-    if (tooltipRef.current && tooltipRef.current.showPopover) {
-      tooltipRef.current.showPopover()
-    }
-  }
-
-  const handleMouseLeave = () => {
-    if (isDrag) return
-    setIsHover(false)
-    setTimeout(() => {
-      if (tooltipRef.current && tooltipRef.current.hidePopover) {
-        tooltipRef.current.hidePopover()
-      }
-    }, 200)
-  }
+  }, [isDrag, update, valueFromClientX])
 
   const handleMouseDown = (evt) => {
     if (disabled) return
-    onDragStart(evt)
-    window.addEventListener('mousemove', onDragging)
-    window.addEventListener('mouseup', onDragEnd)
-  }
-
-  const onDragStart = (evt) => {
+    evt.preventDefault()
     setIsDrag(true)
-    setStartX(evt.clientX)
-    setStartPos(parseInt(currentPosition))
   }
 
-  const onDragging = (evt) => {
-    if (!isDrag) return
-    if (tooltipRef.current && tooltipRef.current.showPopover) {
-      tooltipRef.current.showPopover()
-    }
-    setCurrentX(evt.clientX)
-    const sliderWidth = getSliderWidth()
-    const diff = (evt.clientX - startX) * 100 / sliderWidth
-    const pos = startPos + diff
-    setNewPos(pos)
-    setPosition(pos)
-  }
-
-  const onDragEnd = () => {
-    if (!isDrag) return
-    if (tooltipRef.current && tooltipRef.current.hidePopover) {
-      tooltipRef.current.hidePopover()
-    }
-    setIsDrag(false)
-    setPosition(newPos)
-    window.removeEventListener('mousemove', onDragging)
-    window.removeEventListener('mouseup', onDragEnd)
-  }
-
-  const onSliderClick = (evt) => {
+  const handleTrackClick = (evt) => {
     if (disabled || isDrag) return
-    const sliderOffsetLeft = sliderRef.current.getBoundingClientRect().left
-    const sliderWidth = getSliderWidth()
-    const pos = (evt.clientX - sliderOffsetLeft) / sliderWidth * 100
-    setPosition(pos)
+    update(valueFromClientX(evt.clientX))
   }
 
-  const sliderClasses = classNames(
-    'at-slider',
-    className
-  )
+  const handleKeyDown = (evt) => {
+    if (disabled) return
 
-  const trackClasses = classNames(
-    'at-slider__track',
-    {
-      'at-slider--disabled': disabled
+    const precision = Math.max(decimals(step), decimals(min))
+    const move = (delta) => {
+      evt.preventDefault()
+      update(clamp(parseFloat((value + delta).toFixed(precision)), min, max))
     }
-  )
 
-  const dotWrapperClasses = classNames(
-    'at-slider__dot-wrapper',
-    {
-      'at-slider__dot-wrapper--hover': isHover,
-      'at-slider__dot-wrapper--drag': isDrag
+    switch (evt.key) {
+      case 'ArrowRight':
+      case 'ArrowUp': return move(step)
+      case 'ArrowLeft':
+      case 'ArrowDown': return move(-step)
+      case 'Home': evt.preventDefault(); return update(min)
+      case 'End': evt.preventDefault(); return update(max)
     }
-  )
-
-  const dotClasses = classNames(
-    'at-slider__dot',
-    {
-      'at-slider__dot--hover': isHover,
-      'at-slider__dot--drag': isDrag
-    }
-  )
+  }
 
   return (
-    <div className={sliderClasses} {...restProps}>
-      <InputNumber
-        className="at-slider__input"
-        style={{ display: 'none' }}
-        value={currentValue}
-        step={step}
-        disabled={disabled}
-        min={min}
-        max={max}
-        onChange={(evt) => {
-          const val = evt.target.value
-          if (val === '') return
-          if (!isNaN(val)) {
-            setPosition((val - min) * 100 / (max - min))
-          }
-        }}
-      />
+    <div className={classNames('at-slider', className)} {...restProps}>
       <div
-        className={trackClasses}
-        onClick={onSliderClick}
-        ref={sliderRef}
+        className={classNames('at-slider__track', {
+          'at-slider--disabled': disabled
+        })}
+        onClick={handleTrackClick}
+        ref={trackRef}
       >
-        <div className="at-slider__bar" style={{ width: currentPosition }} />
+        <div className="at-slider__bar" style={{ width: `${percent}%` }} />
         <div
-          className={dotWrapperClasses}
-          style={{ left: currentPosition }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          className={classNames('at-slider__dot-wrapper', {
+            'at-slider__dot-wrapper--hover': isHover,
+            'at-slider__dot-wrapper--drag': isDrag
+          })}
+          style={{ left: `${percent}%` }}
+          onMouseEnter={() => setIsHover(true)}
+          onMouseLeave={() => setIsHover(false)}
           onMouseDown={handleMouseDown}
         >
-          <Tooltip placement="top" trigger="click" content={currentValue} ref={tooltipRef}>
-            <div className={dotClasses} />
+          <Tooltip placement="top" trigger="manual" value={!disabled && (isHover || isDrag)} content={value}>
+            <div
+              className={classNames('at-slider__dot', {
+                'at-slider__dot--hover': isHover,
+                'at-slider__dot--drag': isDrag
+              })}
+              role="slider"
+              tabIndex={disabled ? -1 : 0}
+              aria-valuemin={min}
+              aria-valuemax={max}
+              aria-valuenow={value}
+              aria-disabled={disabled}
+              onKeyDown={handleKeyDown}
+            />
           </Tooltip>
         </div>
       </div>
@@ -191,4 +143,3 @@ const Slider = (props) => {
 Slider.displayName = 'AtSlider'
 
 export default Slider
-

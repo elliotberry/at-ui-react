@@ -1,11 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React from 'react'
 import classNames from 'classnames'
 import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
+const STATUS_ICONS = {
+  success: 'icon-check-circle',
+  error: 'icon-x-circle',
+  warning: 'icon-alert-circle',
+  info: 'icon-info'
+}
+
+/**
+ * Text input. `onChange` receives the native change event, like any React
+ * input (read the new value from `evt.target.value`).
+ */
 const Input = React.forwardRef((props, ref) => {
   const {
     type = 'text',
     value: valueProp,
+    defaultValue,
     name,
     placeholder,
     size,
@@ -29,24 +42,10 @@ const Input = React.forwardRef((props, ref) => {
     ...restProps
   } = props
 
-  const [currentValue, setCurrentValue] = useState(valueProp || '')
-  const inputRef = ref || useRef(null)
+  const [currentValue, setCurrentValue] = useSyncedState(valueProp, defaultValue !== undefined ? defaultValue : '')
   const formItem = useFormItem()
 
-  useEffect(() => {
-    if (valueProp !== currentValue) {
-      setCurrentValue(valueProp || '')
-    }
-  }, [valueProp])
-
-  const iconClassMap = {
-    'success': 'icon-success',
-    'error': 'icon-error',
-    'warning': 'icon-warning',
-    'info': 'icon-info'
-  }
-
-  const iconClass = icon ? `icon-${icon}` : (status ? iconClassMap[status] : '')
+  const iconClass = icon ? `icon-${icon}` : (status ? STATUS_ICONS[status] : '')
 
   const inputClasses = classNames(
     'at-input',
@@ -57,42 +56,21 @@ const Input = React.forwardRef((props, ref) => {
       'at-input--disabled': disabled,
       'at-input--prepend': prepend,
       'at-input--append': append,
-      'at-input--icon': icon
+      'at-input--icon': iconClass
     },
     className
   )
 
-  const handleFocus = (evt) => {
-    if (onFocus) {
-      onFocus(evt)
-    }
-  }
-
   const handleBlur = (evt) => {
-    if (onBlur) {
-      onBlur(evt)
-    }
-    if (formItem && formItem.onBlur) {
-      formItem.onBlur(currentValue)
-    }
+    if (onBlur) onBlur(evt)
+    if (formItem) formItem.onBlur(currentValue)
   }
 
-  const handleInput = (evt) => {
+  const handleChange = (evt) => {
     const newValue = evt.target.value
     setCurrentValue(newValue)
-
-    if (onChange) {
-      // Support both React standard (event) and custom (value) onChange signatures
-      if (onChange.length === 1) {
-        onChange(evt)
-      } else {
-        onChange(newValue, evt)
-      }
-    }
-
-    if (formItem && formItem.onChange) {
-      formItem.onChange(newValue)
-    }
+    if (onChange) onChange(evt)
+    if (formItem) formItem.onChange(newValue)
   }
 
   return (
@@ -106,7 +84,7 @@ const Input = React.forwardRef((props, ref) => {
       )}
 
       <input
-        ref={inputRef}
+        ref={ref}
         className="at-input__original"
         type={type}
         name={name}
@@ -119,10 +97,10 @@ const Input = React.forwardRef((props, ref) => {
         disabled={disabled}
         readOnly={readonly}
         autoFocus={autofocus}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onChange={handleInput}
         {...restProps}
+        onFocus={onFocus}
+        onBlur={handleBlur}
+        onChange={handleChange}
       />
 
       {iconClass && (
@@ -143,4 +121,3 @@ const Input = React.forwardRef((props, ref) => {
 Input.displayName = 'AtInput'
 
 export default Input
-

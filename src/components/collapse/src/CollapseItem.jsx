@@ -1,10 +1,11 @@
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext } from 'react'
 import classNames from 'classnames'
 import { CollapseContext } from './Collapse'
 
 const CollapseItem = (props) => {
   const {
     title,
+    // consumed by <Collapse>
     name,
     disabled = false,
     className,
@@ -13,42 +14,43 @@ const CollapseItem = (props) => {
   } = props
 
   const context = useContext(CollapseContext)
-  const [isActive, setIsActive] = useState(false)
 
-  useEffect(() => {
-    if (context) {
-      const itemName = name !== undefined ? String(name) : undefined
-      setIsActive(context.activeKeys.includes(itemName))
-    }
-  }, [context?.activeKeys, name])
-
-  const toggle = () => {
-    if (disabled || !context) return
-
-    const itemName = name !== undefined ? String(name) : undefined
-    context.toggle(itemName)
+  if (!context) {
+    console.warn('CollapseItem must be used within Collapse')
+    return null
   }
 
-  const collapseItemClasses = classNames(
-    'at-collapse__item',
-    {
-      'at-collapse__item--active': isActive,
-      'at-collapse__item--disabled': disabled
-    },
-    className
-  )
+  const { isActive } = context
+
+  const handleToggle = () => {
+    if (!disabled) context.toggle(context.name)
+  }
 
   return (
-    <div className={collapseItemClasses} {...restProps}>
-      <div className="at-collapse__header" onClick={toggle}>
+    <div
+      className={classNames(
+        'at-collapse__item',
+        {
+          'at-collapse__item--active': isActive,
+          'at-collapse__item--disabled': disabled
+        },
+        className
+      )}
+      {...restProps}
+    >
+      <div
+        className="at-collapse__header"
+        role="button"
+        aria-expanded={isActive}
+        aria-disabled={disabled}
+        onClick={handleToggle}
+      >
         <i className="icon at-collapse__icon icon-chevron-right" />
-        {title && <div>{title}</div>}
+        <div>{title}</div>
       </div>
       {isActive && (
         <div className="at-collapse__body">
-          <div className="at-collapse__content">
-            {children}
-          </div>
+          <div className="at-collapse__content">{children}</div>
         </div>
       )}
     </div>
@@ -58,4 +60,3 @@ const CollapseItem = (props) => {
 CollapseItem.displayName = 'AtCollapseItem'
 
 export default CollapseItem
-

@@ -1,12 +1,27 @@
-import React, { useState, useEffect, createContext } from 'react'
+import React, { createContext } from 'react'
 import classNames from 'classnames'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
 export const CollapseContext = createContext(null)
 
+const normalize = (val) => {
+  if (val === undefined || val === null || val === '') return []
+  return (Array.isArray(val) ? val : [val]).map(String)
+}
+
+const isItem = (child) =>
+  React.isValidElement(child) && child.type && child.type.displayName === 'AtCollapseItem'
+
+/**
+ * `value` is the name (or array of names) of the open items. Items without a
+ * `name` are named by their position ("0", "1", ...). `onChange(names)` always
+ * receives an array of names.
+ */
 const Collapse = (props) => {
   const {
     accordion = false,
     value: valueProp,
+    defaultValue,
     simple = false,
     onChange,
     className,
@@ -14,84 +29,51 @@ const Collapse = (props) => {
     ...restProps
   } = props
 
-  const [currentValue, setCurrentValue] = useState(() => {
-    if (Array.isArray(valueProp)) {
-      return valueProp.map(v => String(v))
-    }
-    return valueProp ? [String(valueProp)] : []
-  })
+  const [rawValue, setRawValue] = useSyncedState(valueProp, defaultValue)
 
-  useEffect(() => {
-    let newValue = valueProp
-    if (Array.isArray(newValue)) {
-      newValue = newValue.map(v => String(v))
-    } else if (newValue !== undefined && newValue !== null) {
-      newValue = [String(newValue)]
-    } else {
-      newValue = []
-    }
-    setCurrentValue(newValue)
-  }, [valueProp])
-
-  const getActiveKey = () => {
-    let activeKey = [...currentValue]
-    
-    if (accordion && activeKey.length > 1) {
-      activeKey = [activeKey[0]]
-    }
-
-    return activeKey
-  }
+  let activeKeys = normalize(rawValue)
+  if (accordion && activeKeys.length > 1) activeKeys = [activeKeys[0]]
 
   const toggle = (name) => {
-    const nameStr = String(name)
-    let newActiveKey = []
+    const isActive = activeKeys.includes(name)
+    let next
 
     if (accordion) {
-      const isActive = currentValue.includes(nameStr)
-      newActiveKey = isActive ? [] : [nameStr]
+      next = isActive ? [] : [name]
     } else {
-      const activeKey = [...currentValue]
-      const nameIndex = activeKey.indexOf(nameStr)
-
-      if (nameIndex >= 0) {
-        activeKey.splice(nameIndex, 1)
-      } else {
-        activeKey.push(nameStr)
-      }
-      newActiveKey = activeKey
+      next = isActive ? activeKeys.filter(key => key !== name) : [...activeKeys, name]
     }
 
-    setCurrentValue(newActiveKey)
-    if (onChange) {
-      onChange(accordion ? newActiveKey[0] : newActiveKey)
-    }
+    setRawValue(next)
+    if (onChange) onChange(next)
   }
 
-  const contextValue = {
-    activeKeys: getActiveKey(),
-    toggle,
-    accordion
-  }
-
-  const collapseClasses = classNames(
-    'at-collapse',
-    {
-      'at-collapse--simple': simple
-    },
-    className
-  )
+  let index = -1
 
   return (
-    <CollapseContext.Provider value={contextValue}>
-      <div className={collapseClasses} {...restProps}>
-        {children}
-      </div>
-    </CollapseContext.Provider>
+    <div
+      className={classNames('at-collapse', { 'at-collapse--simple': simple }, className)}
+      {...restProps}
+    >
+      {React.Children.toArray(children).map((child) => {
+        if (!isItem(child)) return child
+
+        index += 1
+        const name = child.props.name !== undefined ? String(child.props.name) : String(index)
+
+        return (
+          <CollapseContext.Provider
+            key={child.key || index}
+            value={{ name, isActive: activeKeys.includes(name), toggle }}
+          >
+            {child}
+          </CollapseContext.Provider>
+        )
+      })}
+    </div>
   )
 }
 
 Collapse.displayName = 'AtCollapse'
 
 export default Collapse
-

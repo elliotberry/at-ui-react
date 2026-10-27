@@ -1,14 +1,13 @@
-import React from 'react'
-import { usePopover } from '../../../hooks/usePopover'
+import React, { useImperativeHandle } from 'react'
 import classNames from 'classnames'
+import { usePopover } from '../../../hooks/usePopover'
 
 const Tooltip = React.forwardRef((props, ref) => {
   const {
     trigger = 'hover',
-    transition = 'fade',
     placement = 'top',
     content,
-    value: valueProp = false,
+    value,
     onToggle,
     className,
     children,
@@ -20,53 +19,36 @@ const Tooltip = React.forwardRef((props, ref) => {
     position,
     triggerRef,
     popoverRef,
+    triggerProps,
+    popoverProps,
+    toggle,
     showPopover,
     hidePopover
-  } = usePopover({
-    trigger,
-    placement,
-    value: valueProp,
-    onToggle
-  })
+  } = usePopover({ trigger, placement, value, onToggle })
 
-  // Expose methods via ref
-  React.useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, () => ({
+    toggle,
     showPopover,
     hidePopover,
-    show
-  }))
-
-  const tooltipClasses = classNames(
-    'at-tooltip',
-    className
-  )
-
-  const popperClasses = classNames(
-    'at-tooltip__popper',
-    {
-      [`at-tooltip--${placement}`]: placement
-    }
-  )
+    get show () { return show }
+  }), [toggle, showPopover, hidePopover, show])
 
   return (
-    <div className={tooltipClasses} {...restProps}>
-      <span className="at-tooltip__trigger" ref={triggerRef}>
+    <div className={classNames('at-tooltip', className)} {...restProps}>
+      <span className="at-tooltip__trigger" ref={triggerRef} {...triggerProps}>
         {children}
       </span>
 
       {show && (
         <div
-          className={popperClasses}
+          className={classNames('at-tooltip__popper', `at-tooltip--${placement}`)}
           ref={popoverRef}
-          style={{
-            top: `${position.top}px`,
-            left: `${position.left}px`
-          }}
+          style={{ top: `${position.top}px`, left: `${position.left}px` }}
+          role="tooltip"
+          {...popoverProps}
         >
           <div className="at-tooltip__arrow" />
-          <div className="at-tooltip__content">
-            {content}
-          </div>
+          <div className="at-tooltip__content">{content}</div>
         </div>
       )}
     </div>
@@ -76,4 +58,3 @@ const Tooltip = React.forwardRef((props, ref) => {
 Tooltip.displayName = 'AtTooltip'
 
 export default Tooltip
-

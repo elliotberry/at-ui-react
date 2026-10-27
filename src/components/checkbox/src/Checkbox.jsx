@@ -1,8 +1,14 @@
-import React, { useState, useEffect, useContext, createContext } from 'react'
+import React, { useContext, useState, createContext } from 'react'
 import classNames from 'classnames'
+import { useFormItem } from '../../../hooks/useFormItem'
+import { useSyncedState } from '../../../hooks/useSyncedState'
 
 export const CheckboxGroupContext = createContext(null)
 
+/**
+ * Standalone: `value` (or `checked`) is a boolean, `onChange(checked, evt)`.
+ * Inside a CheckboxGroup: `label` identifies the option in the group's array.
+ */
 const Checkbox = (props) => {
   const {
     value: valueProp,
@@ -17,52 +23,44 @@ const Checkbox = (props) => {
   } = props
 
   const groupContext = useContext(CheckboxGroupContext)
+  const formItem = useFormItem()
   const isGroup = !!groupContext
 
-  const [currentValue, setCurrentValue] = useState(valueProp || checkedProp || false)
+  const [standaloneChecked, setStandaloneChecked] = useSyncedState(
+    valueProp !== undefined ? valueProp : checkedProp,
+    false
+  )
   const [focus, setFocus] = useState(false)
 
-  useEffect(() => {
-    if (isGroup) {
-      // In group mode, value is controlled by parent
-      const isChecked = Array.isArray(groupContext.value) && groupContext.value.includes(label)
-      setCurrentValue(isChecked)
-    } else {
-      setCurrentValue(valueProp !== undefined ? valueProp : checkedProp || false)
-    }
-  }, [valueProp, checkedProp, isGroup, groupContext?.value, label])
+  const checked = isGroup
+    ? Array.isArray(groupContext.value) && groupContext.value.includes(label)
+    : !!standaloneChecked
+
+  const isDisabled = disabled || (isGroup && groupContext.disabled)
 
   const checkboxClasses = classNames(
     'at-checkbox',
     {
       'at-checkbox--focus': focus,
-      'at-checkbox--checked': currentValue,
-      'at-checkbox--disabled': disabled
+      'at-checkbox--checked': checked,
+      'at-checkbox--disabled': isDisabled
     },
     className
   )
 
   const handleChange = (evt) => {
-    if (disabled) return
+    if (isDisabled) return
 
-    const checked = evt.target.checked
-    
+    const nextChecked = evt.target.checked
+
     if (isGroup) {
-      // Group mode: let parent handle the change
-      if (groupContext.onChange) {
-        groupContext.onChange(label, checked)
-      }
+      groupContext.onChange(label, nextChecked)
     } else {
-      // Single mode
-      setCurrentValue(checked)
-      if (onChange) {
-        onChange(checked, evt)
-      }
+      setStandaloneChecked(nextChecked)
+      if (formItem) formItem.onChange(nextChecked)
     }
+    if (onChange) onChange(nextChecked, evt)
   }
-
-  const handleFocus = () => setFocus(true)
-  const handleBlur = () => setFocus(false)
 
   return (
     <label className={checkboxClasses}>
@@ -73,16 +71,16 @@ const Checkbox = (props) => {
           className="at-checkbox__original"
           name={name}
           value={isGroup ? label : undefined}
-          checked={currentValue}
-          disabled={disabled}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
+          checked={checked}
+          disabled={isDisabled}
           {...restProps}
+          onChange={handleChange}
+          onFocus={() => setFocus(true)}
+          onBlur={() => setFocus(false)}
         />
       </span>
       <span className="at-checkbox__label">
-        {children || label}
+        {children !== undefined ? children : label}
       </span>
     </label>
   )
@@ -91,4 +89,3 @@ const Checkbox = (props) => {
 Checkbox.displayName = 'AtCheckbox'
 
 export default Checkbox
-

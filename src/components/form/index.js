@@ -1,16 +1,7 @@
-// Form components not yet converted to React
-// Placeholder exports
-const Form = () => {
-  console.warn('Form component is not yet converted to React')
-  return null
-}
+import Form from './src/Form'
+import FormItem from './src/FormItem'
 
-const FormItem = () => {
-  console.warn('FormItem component is not yet converted to React')
-  return null
-}
+Form.Item = FormItem
 
-export {
-  Form,
-  FormItem
-}
+export default Form
+export { Form, FormItem }

@@ -34,8 +34,8 @@ export function getStyle (element, styleName) {
 
   try {
     const computed = document.defaultView.getComputedStyle(element, '')
-    return element.style[styleName] || computed ? computed[styleName] : null
-  } catch (e) {
+    return element.style[styleName] || (computed ? computed[styleName] : null)
+  } catch {
     return element.style[styleName]
   }
 }

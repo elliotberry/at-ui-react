@@ -24,7 +24,7 @@ const Alert = (props) => {
     'info': 'icon-info'
   }
 
-  const iconClass = iconClassMap[type] || icon || 'icon-info'
+  const iconClass = icon || iconClassMap[type] || 'icon-info'
 
   const alertClasses = classNames(
     'at-alert',

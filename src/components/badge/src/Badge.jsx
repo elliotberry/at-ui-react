@@ -13,32 +13,28 @@ const Badge = (props) => {
     ...restProps
   } = props
 
-  const getContent = () => {
-    if (dot) return null
-
-    if (typeof value === 'number' && typeof maxNum === 'number') {
-      return value > maxNum ? `${maxNum}+` : value
-    }
-
-    return value
+  let content = null
+  if (!dot) {
+    content = typeof value === 'number' && typeof maxNum === 'number' && value > maxNum
+      ? `${maxNum}+`
+      : value
   }
 
-  const content = getContent()
-  const hasChildren = !!children
-
-  const contentClasses = classNames(
-    'at-badge__content',
-    {
-      'at-badge--corner': hasChildren,
-      'at-badge--dot': dot
-    }
-  )
+  const hasChildren = children !== undefined && children !== null && children !== false
 
   return (
-    <span className={`at-badge at-badge--${status} ${hasChildren ? 'at-badge--corner' : 'at-badge--alone'} ${className}`} {...restProps}>
+    <span
+      className={classNames(
+        'at-badge',
+        `at-badge--${status}`,
+        { 'at-badge--alone': !hasChildren },
+        className
+      )}
+      {...restProps}
+    >
       {children}
       {show && (
-        <sup className={contentClasses}>
+        <sup className={classNames('at-badge__content', { 'at-badge--corner': hasChildren, 'at-badge--dot': dot })}>
           {content}
         </sup>
       )}
@@ -46,7 +42,6 @@ const Badge = (props) => {
   )
 }
 
-Badge.displayName = 'ATBadge'
+Badge.displayName = 'AtBadge'
 
 export default Badge
-

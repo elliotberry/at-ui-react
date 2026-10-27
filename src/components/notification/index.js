@@ -1,3 +1,3 @@
-import Notification from './src/Notification'
+import Notification from './src/api'
 
 export default Notification
